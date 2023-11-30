@@ -13,15 +13,42 @@ from helper import plot
 
 ###### IMMUTABLE VARIABLES
 
-MAX_MEMORY = 100_000 # Maximum memory for the agent 
+MAX_MEMORY = 100_000 # Maximum memory for the agent  
 BATCH_SIZE = 1000 # Batch size for training
 ALPHA = 0.001  # Learning rate for the model
+LEARNING_RATE_GA = (0.1, 0.9)
 
 
-# Deep Q-Learning + Genetic Algorithm
-
+# Deep Q-Learning 
 # Q new value = Q current   + Learn Rate * [ Reward + Discount Rate * Max Future Expected Reward - Q_current ]
 # Q_new(s,a) = Q_current(s,a) + ALPHA [R (s,a) + GAMMA MAX Q'(s',a') - Q_current(s,a) ]
+
+##########################################################################################################################
+#ALPHA - LEARNING RATE DQN
+
+#The learning rate determines the extent to which newly acquired information overrides old information. 
+#It regulates how much the Q-values are updated based on new experiences.
+#A higher learning rate means faster updates, but it might lead to instability or overshooting optimal values.
+
+##########################################################################################################################
+#GAMMA - DISCOUNT RATE DQN
+
+#The discount factor signifies the importance of future rewards compared to immediate rewards. 
+#It determines how much the agent values future rewards over immediate ones. 
+#A higher discount factor values long-term rewards more, influencing the agent’s decision-making.
+
+##########################################################################################################################
+#EPSILON - EXPLORATION RATE Q_current -> Q_new using Bellman Equation
+
+#Loss = E [(rt + GAMMA * max(Q_st+1, a', theta-) - Q (st, at, theta))^2
+#Loss = greedy strategy ---> starts high and decreases over time
+
+#if random_number < epsilon:
+#    select_random_action()
+#else:
+#    select_action_with_highest_q_value()
+
+# Genetic Algorithm - Fitness Function
 
 class QLearningAgent:
 
@@ -161,5 +188,63 @@ def train():
             plot(plot_scores, plot_mean_scores) # Plot the game scores and mean scores
 
 
+#class GeneticAlgorithm:
+    def __init__(self, population_size, param_ranges):
+        self.population_size = population_size
+        self.param_ranges = param_ranges
+
+    def generate_population(self):
+        # Generate initial population of parameters
+        population = []
+        for _ in range(self.population_size):
+            params = {param: random.uniform(param_range[0], param_range[1])
+                      for param, param_range in self.param_ranges.items()}
+            population.append(params)
+        return population
+    
+    def evolve(self):
+        population = self.generate_population()
+
+        for generation in range(num_generations):
+            # Train Q-learning agents with parameters from the population
+            agents = [QLearningAgent(params) for params in population]
+            for agent in agents:
+                agent.train()
+                agent.evaluate()  # Evaluate the agent's performance
+
+            # Select top-performing agents for genetic operations
+            top_agents = select_top_agents(agents)
+
+            # Apply genetic operations (crossover and mutation)
+            new_population = crossover_and_mutation(top_agents)
+
+            population = new_population
+
+        # Extract the best-performing agent from the final population
+        best_agent_params = get_best_agent_params(population)
+        best_agent = QLearningAgent(best_agent_params)
+        return best_agent
+
+
 if __name__ == '__main__':
     train()
+
+# if __name2__ == '__main__':
+
+#     # Define parameter ranges for genetic algorithm
+#     param_ranges = {
+#         "learning_rate": LEARNING_RATE_GA,
+#         "epsilon": (0.1, 0.5),
+#         # Add other Q-learning hyperparameters here
+#     }
+
+#     # Initialize genetic algorithm -> Optimize agent parameters (Defining which parameters)
+#     ga = GeneticAlgorithm(population_size=10, param_ranges=param_ranges)
+
+#     # Evolve and find the best Q-learning agent parameters
+#     best_agent = ga.evolve()
+
+#     # Train the best Q-learning agent with the optimal parameters
+#     best_agent.train()
+
+#     train()
