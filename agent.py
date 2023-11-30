@@ -8,8 +8,8 @@ import random
 import numpy as np
 from collections import deque
 from game import SnakeGameAI, Direction, Point
-from model import Linear_QNet, QTrainer
-from helper import plot
+from model import LinearQNet, QTrainer
+from plotme import TrainingPlot
 
 ###### IMMUTABLE VARIABLES
 
@@ -57,7 +57,7 @@ class QLearningAgent:
         self.epsilon = 0 # Parameter for exploration-exploitation trade-off
         self.gamma = 0.9 # Discount factor for future rewards
         self.memory = deque(maxlen=MAX_MEMORY) # Replay memory for storing experiences
-        self.model = Linear_QNet(11, 256, 3) # Neural network model (input size, hidden size, output size)
+        self.model = LinearQNet(11, 256, 3) # Neural network model (input size, hidden size, output size)
         self.trainer = QTrainer(self.model, lr=ALPHA, gamma=self.gamma) # QTrainer for model training
 
 
@@ -144,10 +144,13 @@ class QLearningAgent:
 
 
 def train():
-    plot_scores = [] # To store game scores for plotting
-    plot_mean_scores = [] # To store mean scores for plotting   
+    plotter = TrainingPlot() # To store game scores for plotting
+    plot_scores = [] # To store mean scores for plotting  
+    plot_mean_scores = []  # To store mean scores for plotting 
     total_score = 0 # Total score across all games
     record = 0 # Record score obtained in a game
+    stats_list = []  # To store statistics for plotting
+    snake_sizes_data = np.zeros((1, 1))  # Initial placeholder for snake size data
     agent = QLearningAgent() # Initialize the agent
     game = SnakeGameAI() # Initialize the game environment
 
@@ -185,7 +188,8 @@ def train():
             total_score += score
             mean_score = total_score / agent.n_games
             plot_mean_scores.append(mean_score)
-            plot(plot_scores, plot_mean_scores) # Plot the game scores and mean scores
+            plotter.update(plot_scores, plot_mean_scores)
+
 
 
 #class GeneticAlgorithm:
