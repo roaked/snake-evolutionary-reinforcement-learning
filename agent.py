@@ -7,7 +7,7 @@ import torch
 import random
 import numpy as np
 from collections import deque
-from game import SnakeGameAI, Direction, Point
+from game import SnakeGameAI, Direction, Point, GameLogic
 from model import LinearQNet, QTrainer
 from plotme import TrainingPlot
 
@@ -57,8 +57,8 @@ class QLearningAgent:
         self.epsilon = 0 # Parameter for exploration-exploitation trade-off
         self.gamma = 0.9 # Discount factor for future rewards
         self.memory = deque(maxlen=MAX_MEMORY) # Replay memory for storing experiences
-        self.model = LinearQNet(11, 256, 3) # Neural network model (input size, hidden size, output size)
-        self.trainer = QTrainer(self.model, lr=ALPHA, gamma=self.gamma) # QTrainer for model training
+        self.model = LinearQNet(11, 256, 3) # Neural network model (input size, hidden size, output size) ----- GA
+        self.trainer = QTrainer(self.model, lr=ALPHA, gamma=self.gamma) # QTrainer for model training -- GA
 
 
     def get_state(self, game):
@@ -173,7 +173,7 @@ def train():
 
         if done:
             # Train the agent's long-term memory and plot the results
-            game.reset()
+            game._init_game()
             agent.n_games += 1
             agent.train_long_memory()
 

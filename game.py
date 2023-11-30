@@ -5,8 +5,7 @@ from collections import namedtuple
 import numpy as np
 
 pygame.init()
-font = pygame.font.Font('arial.ttf', 25)
-#font = pygame.font.SysFont('arial', 25)
+font = pygame.font.SysFont('arial', 25)
 
 class Direction(Enum):
     RIGHT = 1
@@ -28,34 +27,34 @@ SPEED = 40
 
 class SnakeGameAI:
 
-    def __init__(self, w=640, h=480):
-        self.w = w
-        self.h = h
-        # init display
-        self.display = pygame.display.set_mode((self.w, self.h))
+    def __init__(self, width=720, height=580):
+        #window display
+        self.width = width
+        self.height = height
+        self.display = pygame.display.set_mode((self.width, self.height))
         pygame.display.set_caption('Snake')
         self.clock = pygame.time.Clock()
-        self.reset()
+        self._init_game()
 
 
-    def reset(self):
-        # init game state
+    def _init_game(self):
+        # Initialize game state
         self.direction = Direction.RIGHT
-
-        self.head = Point(self.w/2, self.h/2)
-        self.snake = [self.head,
-                      Point(self.head.x-BLOCK_SIZE, self.head.y),
-                      Point(self.head.x-(2*BLOCK_SIZE), self.head.y)]
-
+        self.head = Point(self.width / 2, self.height / 2)
+        self.snake = [
+            self.head,
+            Point(self.head.x - BLOCK_SIZE, self.head.y),
+            Point(self.head.x - (2 * BLOCK_SIZE), self.head.y)
+        ]
         self.score = 0
         self.food = None
-        self._place_food()
         self.frame_iteration = 0
+        self._place_food()
 
 
     def _place_food(self):
-        x = random.randint(0, (self.w-BLOCK_SIZE )//BLOCK_SIZE )*BLOCK_SIZE
-        y = random.randint(0, (self.h-BLOCK_SIZE )//BLOCK_SIZE )*BLOCK_SIZE
+        x = random.randint(0, (self.width-BLOCK_SIZE )//BLOCK_SIZE )*BLOCK_SIZE
+        y = random.randint(0, (self.height-BLOCK_SIZE )//BLOCK_SIZE )*BLOCK_SIZE
         self.food = Point(x, y)
         if self.food in self.snake:
             self._place_food()
@@ -100,7 +99,7 @@ class SnakeGameAI:
         if pt is None:
             pt = self.head
         # hits boundary
-        if pt.x > self.w - BLOCK_SIZE or pt.x < 0 or pt.y > self.h - BLOCK_SIZE or pt.y < 0:
+        if pt.x > self.width - BLOCK_SIZE or pt.x < 0 or pt.y > self.height - BLOCK_SIZE or pt.y < 0:
             return True
         # hits itself
         if pt in self.snake[1:]:
@@ -152,3 +151,39 @@ class SnakeGameAI:
             y -= BLOCK_SIZE
 
         self.head = Point(x, y)
+
+class GameLogic:
+    def __init__(self, width=640, height=480):
+        self.game = SnakeGameAI(width, height)
+        self.running = True
+
+    def run_game(self):
+        pygame.init()
+        font = pygame.font.Font('arial.ttf', 25)
+        clock = pygame.time.Clock()
+
+        while self.running:
+            action = self.get_user_input()
+            reward, game_over, score = self.game.play_step(action)
+
+            if game_over:
+                self.running = False
+
+            self._update_display(font, score)
+            clock.tick(SPEED)
+
+        pygame.quit()
+
+    def get_user_input(self):
+        # Retrieve user input (keyboard, AI, etc.)
+        # Implement based on how the input will be obtained
+        pass
+
+    def _update_display(self, font, score):
+        # Update the game display
+        # Display logic using pygame
+        pass
+
+if __name__ == "__main__":
+    game_instance = GameLogic()
+    game_instance.run_game()
