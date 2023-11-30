@@ -1,10 +1,15 @@
-import pygame
-import random
+import random, pygame, sys, time
 from enum import Enum
 from collections import namedtuple
 import numpy as np
 
-pygame.init()
+check_errors = pygame.init() 
+if check_errors[1] > 0:
+    print(f'[!] Had {check_errors[1]} errors when initialising game, exiting...')
+    sys.exit(-1)
+else:
+    print('[+] Game successfully initialised')
+
 font = pygame.font.SysFont('arial', 25)
 
 class Direction(Enum):
@@ -15,19 +20,32 @@ class Direction(Enum):
 
 Point = namedtuple('Point', 'x, y')
 
-# rgb colors
+# DIFFICULTY
+# Easy      -> 10
+# Medium    ->  25
+# Hard      ->  40
+# Harder    ->  60
+# Impossible->  120
+DIFFICULTY = 25
+
+# WINDOW SIZE
+HEIGHT = 720
+WIDTH = 480
+
+# RGB COLORS
 WHITE = (255, 255, 255)
 RED = (200,0,0)
 BLUE1 = (0, 0, 255)
 BLUE2 = (0, 100, 255)
 BLACK = (0,0,0)
 
+# SETTINGS
 BLOCK_SIZE = 20
 SPEED = 40
 
 class SnakeGameAI:
 
-    def __init__(self, width=720, height=580):
+    def __init__(self, width=WIDTH, height=HEIGHT):
         #window display
         self.width = width
         self.height = height
