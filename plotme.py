@@ -1,5 +1,7 @@
 import matplotlib.pyplot as plt
 from IPython import display
+import numpy as np
+import imageio
 
 class TrainingPlot:
     def __init__(self):
@@ -29,3 +31,4 @@ class TrainingPlot:
         display.clear_output(wait=True)
         display.display(self.fig)
         plt.pause(0.1)
+

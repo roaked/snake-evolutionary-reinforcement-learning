@@ -2,7 +2,7 @@
 ##conda pipenv -n "name here" python=3.7
 ##conda activate "name here"
 
-
+import io
 import torch
 import random
 import numpy as np
@@ -189,6 +189,9 @@ def train():
             mean_score = total_score / agent.n_games
             plot_mean_scores.append(mean_score)
             plotter.update(plot_scores, plot_mean_scores)
+            #if agent.n_games == 10:  # Set the number of games to generate the GIF
+            #   plotter.create_gif()  # Generate the GIF after 200 games
+            #  break  # End the training loop
 
 
 
