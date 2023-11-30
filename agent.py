@@ -11,22 +11,32 @@ from game import SnakeGameAI, Direction, Point
 from model import Linear_QNet, QTrainer
 from helper import plot
 
-MAX_MEMORY = 100_000
-BATCH_SIZE = 1000
-LR = 0.001
+###### IMMUTABLE VARIABLES
 
-class Agent:
+MAX_MEMORY = 100_000 # Maximum memory for the agent 
+BATCH_SIZE = 1000 # Batch size for training
+ALPHA = 0.001  # Learning rate for the model
+
+
+# Deep Q-Learning + Genetic Algorithm
+
+# Q new value = Q current   + Learn Rate * [ Reward + Discount Rate * Max Future Expected Reward - Q_current ]
+# Q_new(s,a) = Q_current(s,a) + ALPHA [R (s,a) + GAMMA MAX Q'(s',a') - Q_current(s,a) ]
+
+class QLearningAgent:
 
     def __init__(self):
-        self.n_games = 0
-        self.epsilon = 0 # randomness
-        self.gamma = 0.9 # discount rate
-        self.memory = deque(maxlen=MAX_MEMORY) # popleft()
-        self.model = Linear_QNet(11, 256, 3)
-        self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
+        self.n_games = 0 # Number of games played
+        self.epsilon = 0 # Parameter for exploration-exploitation trade-off
+        self.gamma = 0.9 # Discount factor for future rewards
+        self.memory = deque(maxlen=MAX_MEMORY) # Replay memory for storing experiences
+        self.model = Linear_QNet(11, 256, 3) # Neural network model
+        self.trainer = QTrainer(self.model, lr=ALPHA, gamma=self.gamma) # QTrainer for model training
 
 
     def get_state(self, game):
+        # Function to obtain the state representation based on the game state
+        # Generates information about dangers, direction, and food location
         head = game.snake[0]
         point_l = Point(head.x - 20, head.y)
         point_r = Point(head.x + 20, head.y)
@@ -73,9 +83,11 @@ class Agent:
         return np.array(state, dtype=int)
 
     def remember(self, state, action, reward, next_state, done):
-        self.memory.append((state, action, reward, next_state, done)) # popleft if MAX_MEMORY is reached
+        # Store experience (state, action, reward, next_state, done) in memory
+        self.memory.append((state, action, reward, next_state, done)) 
 
     def train_long_memory(self):
+        # Sample from memory and perform a training step using QTrainer
         if len(self.memory) > BATCH_SIZE:
             mini_sample = random.sample(self.memory, BATCH_SIZE) # list of tuples
         else:
@@ -83,14 +95,13 @@ class Agent:
 
         states, actions, rewards, next_states, dones = zip(*mini_sample)
         self.trainer.train_step(states, actions, rewards, next_states, dones)
-        #for state, action, reward, nexrt_state, done in mini_sample:
-        #    self.trainer.train_step(state, action, reward, next_state, done)
 
     def train_short_memory(self, state, action, reward, next_state, done):
+        # Perform a single training step using a single experience tuple
         self.trainer.train_step(state, action, reward, next_state, done)
 
     def get_action(self, state):
-        # random moves: tradeoff exploration / exploitation
+        # Select actions based on an epsilon-greedy strategy
         self.epsilon = 80 - self.n_games
         final_move = [0,0,0]
         if random.randint(0, 200) < self.epsilon:
@@ -106,31 +117,32 @@ class Agent:
 
 
 def train():
-    plot_scores = []
-    plot_mean_scores = []
-    total_score = 0
-    record = 0
-    agent = Agent()
-    game = SnakeGameAI()
+    plot_scores = [] # To store game scores for plotting
+    plot_mean_scores = [] # To store mean scores for plotting   
+    total_score = 0 # Total score across all games
+    record = 0 # Record score obtained in a game
+    agent = QLearningAgent() # Initialize the agent
+    game = SnakeGameAI() # Initialize the game environment
+
     while True:
-        # get old state
+        # Get the old state from the game
         state_old = agent.get_state(game)
 
-        # get move
+        # Choose an action based on the old state
         final_move = agent.get_action(state_old)
 
-        # perform move and get new state
+        # Perform the chosen action in the game and get the new state
         reward, done, score = game.play_step(final_move)
         state_new = agent.get_state(game)
 
-        # train short memory
+        # Train the agent using short memory (single experience)
         agent.train_short_memory(state_old, final_move, reward, state_new, done)
 
-        # remember
+        # Store the experience in the agent's memory
         agent.remember(state_old, final_move, reward, state_new, done)
 
         if done:
-            # train long memory, plot result
+            # Train the agent's long-term memory and plot the results
             game.reset()
             agent.n_games += 1
             agent.train_long_memory()
@@ -141,11 +153,12 @@ def train():
 
             print('Game', agent.n_games, 'Score', score, 'Record:', record)
 
+            # Update scores for plotting
             plot_scores.append(score)
             total_score += score
             mean_score = total_score / agent.n_games
             plot_mean_scores.append(mean_score)
-            plot(plot_scores, plot_mean_scores)
+            plot(plot_scores, plot_mean_scores) # Plot the game scores and mean scores
 
 
 if __name__ == '__main__':
