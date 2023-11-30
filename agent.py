@@ -57,7 +57,7 @@ class QLearningAgent:
         self.epsilon = 0 # Parameter for exploration-exploitation trade-off
         self.gamma = 0.9 # Discount factor for future rewards
         self.memory = deque(maxlen=MAX_MEMORY) # Replay memory for storing experiences
-        self.model = Linear_QNet(11, 256, 3) # Neural network model
+        self.model = Linear_QNet(11, 256, 3) # Neural network model (input size, hidden size, output size)
         self.trainer = QTrainer(self.model, lr=ALPHA, gamma=self.gamma) # QTrainer for model training
 
 
