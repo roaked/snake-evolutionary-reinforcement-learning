@@ -1,3 +1,8 @@
+##creating venv with miniconda
+##conda pipenv -n "name here" python=3.7
+##conda activate "name here"
+
+
 import torch
 import random
 import numpy as np
