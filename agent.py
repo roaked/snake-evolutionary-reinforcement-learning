@@ -2,7 +2,8 @@
 ##conda pipenv -n "name here" python=3.7
 ##conda activate "name here"
 
-import io, time, imageio
+import time
+import imageio
 import torch
 import random
 import pygame
