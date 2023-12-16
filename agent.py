@@ -159,10 +159,12 @@ def train_and_record(record_duration):
     recording_started = False
     images = []
 
+    
+
     while time.time() - start_time < record_duration:
         state_old = agent.get_state(game)
         final_move = agent.get_action(state_old)
-        reward, done, score = game.play_step(final_move)
+        reward, done, score = game.play_step(final_move, userControl)
         state_new = agent.get_state(game)
         agent.train_short_memory(state_old, final_move, reward, state_new, done)
         agent.remember(state_old, final_move, reward, state_new, done)
@@ -204,5 +206,39 @@ def train_and_record(record_duration):
     pygame.quit()
 
 if __name__ == "__main__":
-    # Call train_and_record function with given duration input
-    train_and_record(90)  # Duration in seconds
+
+    userControl = int(input("Choose 1 for autonomous play or 2 for user control: \n"))
+    
+    while(userControl != 1 and userControl != 2):
+        userControl = int(input("Choose 1 for autonomous play or 2 for user control: \n"))
+
+    if userControl == 2:
+
+        game = SnakeGameAI()
+        # Initialize user_input
+        user_input = np.array([1, 0, 0])  # Default: Move right initially
+
+        # Main game loop
+        while True:
+            # Collecting user input
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_UP]:
+                user_input = np.array([0, 0, 1])  # Move up
+            elif keys[pygame.K_DOWN] and user_input[2] != 1:
+                user_input = np.array([0, 1, 0])  # Move down
+            elif keys[pygame.K_LEFT] and user_input[0] != 1:
+                user_input = np.array([1, 0, 0])  # Move left
+            elif keys[pygame.K_RIGHT] and user_input[0] != 1:
+                user_input = np.array([0, 0, 0])  # Move right
+
+            # Play a step in the game using the chosen input
+            reward, game_over, score = game.play_step(user_input, userControl)
+
+            # Check if the game is over
+            if game_over:
+                print(f"Game Over! Your final score is {score}")
+                break
+
+    else:
+        # Call train_and_record function with given duration input
+        train_and_record(90)  # Duration in seconds
