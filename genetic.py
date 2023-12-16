@@ -1,5 +1,6 @@
 import random
 from model import QTrainer
+from agent import QLearningAgent
 
 class GeneticAlgorithm:
     def __init__(self, population_size, param_ranges):
@@ -15,6 +16,15 @@ class GeneticAlgorithm:
             population.append(params)
         return population
     
+    def select_top_agents(agent):
+        return 1
+    
+    def crossover_and_mutation(agent):
+        return 1
+    
+    def get_best_agent_params(population):
+        return 1
+    
     def evolve(self):
         population = self.generate_population()
 
@@ -26,34 +36,32 @@ class GeneticAlgorithm:
                 agent.evaluate()  # Evaluate the agent's performance
 
             # Select top-performing agents for genetic operations
-            top_agents = select_top_agents(agents)
+            top_agents = GeneticAlgorithm.select_top_agents(agents)
 
             # Apply genetic operations (crossover and mutation)
-            new_population = crossover_and_mutation(top_agents)
+            new_population = GeneticAlgorithm.crossover_and_mutation(top_agents)
 
             population = new_population
 
         # Extract the best-performing agent from the final population
-        best_agent_params = get_best_agent_params(population)
+        best_agent_params = GeneticAlgorithm.get_best_agent_params(population)
         best_agent = QLearningAgent(best_agent_params)
         return best_agent
 
-
+LEARNING_RATE_GA = (0.1, 0.9)
 
 # Define parameter ranges for genetic algorithm
 param_ranges = {
     "learning_rate": LEARNING_RATE_GA,
-    "epsilon": (0.1, 0.5),
-    # Add other Q-learning hyperparameters here
+    "epsilon": (0.1, 0.9),
+    # other Q-learning hyperparameters here
 }
 
-# Initialize genetic algorithm -> Optimize agent parameters (Defining which parameters)
-ga = GeneticAlgorithm(population_size=10, param_ranges=param_ranges)
+ga = GeneticAlgorithm(population_size=10, param_ranges=param_ranges) # pop size = 10
 
 # Evolve and find the best Q-learning agent parameters
 best_agent = ga.evolve()
 
 # Train the best Q-learning agent with the optimal parameters
 best_agent.train()
-
-train()
+#train()
