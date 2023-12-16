@@ -142,12 +142,11 @@ class SnakeGameAI:
 
 
     def _move(self, action):
-        # [straight, right, left]
 
         clock_wise = [Direction.RIGHT, Direction.DOWN, Direction.LEFT, Direction.UP]
         idx = clock_wise.index(self.direction)
 
-        if np.array_equal(action, [1, 0, 0]):
+        if np.array_equal(action, [1, 0, 0]): # str, right, left
             new_dir = clock_wise[idx] # No change
         elif np.array_equal(action, [0, 1, 0]):
             next_idx = (idx + 1) % 4
@@ -166,6 +165,7 @@ class SnakeGameAI:
             self.head = Point(self.head.x, self.head.y + BLOCK_SIZE)
         elif self.direction == Direction.UP:
             self.head = Point(self.head.x, self.head.y - BLOCK_SIZE)
+
 
 # Init
 game = SnakeGameAI()
