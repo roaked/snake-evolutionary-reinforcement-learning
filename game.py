@@ -42,7 +42,7 @@ BLACK = (0,0,0)
 
 # SETTINGS
 BLOCK_SIZE = 20
-SPEED = 160
+SPEED = 20
 
 class SnakeGameAI:
 
@@ -158,15 +158,33 @@ class SnakeGameAI:
 
         self.direction = new_dir
 
-        x = self.head.x
-        y = self.head.y
         if self.direction == Direction.RIGHT:
-            x += BLOCK_SIZE
+            self.head = Point(self.head.x + BLOCK_SIZE, self.head.y)
         elif self.direction == Direction.LEFT:
-            x -= BLOCK_SIZE
+            self.head = Point(self.head.x - BLOCK_SIZE, self.head.y)
         elif self.direction == Direction.DOWN:
-            y += BLOCK_SIZE
+            self.head = Point(self.head.x, self.head.y + BLOCK_SIZE)
         elif self.direction == Direction.UP:
-            y -= BLOCK_SIZE
+            self.head = Point(self.head.x, self.head.y - BLOCK_SIZE)
 
-        self.head = Point(x, y)
+# Init
+game = SnakeGameAI()
+user_input = np.array([1, 0, 0]) 
+
+while True:
+    # Collecting user input
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_UP]:
+        user_input = np.array([0, 0, 1])  # Move up
+    elif keys[pygame.K_DOWN] and user_input[2] != 1:
+        user_input = np.array([0, 1, 0])  # Move down
+    elif keys[pygame.K_LEFT] and user_input[0] != 1:
+        user_input = np.array([1, 0, 0])  # Move left
+    elif keys[pygame.K_RIGHT] and user_input[0] != 1:
+        user_input = np.array([0, 0, 0])  # Move right
+        
+    reward, game_over, score = game.play_step(user_input)
+
+    if game_over:
+        print(f"Game Over! Your final score is {score}")
+        break
