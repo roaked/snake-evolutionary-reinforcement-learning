@@ -2,6 +2,7 @@ import random, pygame, sys, time
 from enum import Enum
 from collections import namedtuple
 import numpy as np
+import imageio
 
 check_errors = pygame.init() 
 if check_errors[1] > 0:
@@ -169,39 +170,3 @@ class SnakeGameAI:
             y -= BLOCK_SIZE
 
         self.head = Point(x, y)
-
-class GameLogic:
-    def __init__(self, width=640, height=480):
-        self.game = SnakeGameAI(width, height)
-        self.running = True
-
-    def run_game(self):
-        pygame.init()
-        font = pygame.font.Font('arial.ttf', 25)
-        clock = pygame.time.Clock()
-
-        while self.running:
-            action = self.get_user_input()
-            reward, game_over, score = self.game.play_step(action)
-
-            if game_over:
-                self.running = False
-
-            self._update_display(font, score)
-            clock.tick(SPEED)
-
-        pygame.quit()
-
-    def get_user_input(self):
-        # Retrieve user input (keyboard, AI, etc.)
-        # Implement based on how the input will be obtained
-        pass
-
-    def _update_display(self, font, score):
-        # Update the game display
-        # Display logic using pygame
-        pass
-
-if __name__ == "__main__":
-    game_instance = GameLogic()
-    game_instance.run_game()

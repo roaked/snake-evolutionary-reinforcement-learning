@@ -2,12 +2,13 @@
 ##conda pipenv -n "name here" python=3.7
 ##conda activate "name here"
 
-import io
+import io, time, imageio
 import torch
 import random
+import pygame
 import numpy as np
 from collections import deque
-from game import SnakeGameAI, Direction, Point, GameLogic
+from game import SnakeGameAI, Direction, Point
 from model import LinearQNet, QTrainer
 from plotme import TrainingPlot
 
@@ -18,37 +19,38 @@ BATCH_SIZE = 1000 # Batch size for training
 ALPHA = 0.001  # Learning rate for the model
 LEARNING_RATE_GA = (0.1, 0.9)
 
+"""
+Deep Q-Learning 
+Q new value = Q current   + Learn Rate * [ Reward + Discount Rate * Max Future Expected Reward - Q_current ]
+Q_new(s,a) = Q_current(s,a) + ALPHA [R (s,a) + GAMMA MAX Q'(s',a') - Q_current(s,a) ]
 
-# Deep Q-Learning 
-# Q new value = Q current   + Learn Rate * [ Reward + Discount Rate * Max Future Expected Reward - Q_current ]
-# Q_new(s,a) = Q_current(s,a) + ALPHA [R (s,a) + GAMMA MAX Q'(s',a') - Q_current(s,a) ]
+#########################################################################################################################
+ALPHA - LEARNING RATE DQN
 
-##########################################################################################################################
-#ALPHA - LEARNING RATE DQN
+The learning rate determines the extent to which newly acquired information overrides old information. 
+It regulates how much the Q-values are updated based on new experiences.
+A higher learning rate means faster updates, but it might lead to instability or overshooting optimal values.
 
-#The learning rate determines the extent to which newly acquired information overrides old information. 
-#It regulates how much the Q-values are updated based on new experiences.
-#A higher learning rate means faster updates, but it might lead to instability or overshooting optimal values.
+#########################################################################################################################
+GAMMA - DISCOUNT RATE DQN
 
-##########################################################################################################################
-#GAMMA - DISCOUNT RATE DQN
+The discount factor signifies the importance of future rewards compared to immediate rewards. 
+It determines how much the agent values future rewards over immediate ones. 
+A higher discount factor values long-term rewards more, influencing the agent’s decision-making.
 
-#The discount factor signifies the importance of future rewards compared to immediate rewards. 
-#It determines how much the agent values future rewards over immediate ones. 
-#A higher discount factor values long-term rewards more, influencing the agent’s decision-making.
+#########################################################################################################################
+EPSILON - EXPLORATION RATE Q_current -> Q_new using Bellman Equation
 
-##########################################################################################################################
-#EPSILON - EXPLORATION RATE Q_current -> Q_new using Bellman Equation
+Loss = E [(rt + GAMMA * max(Q_st+1, a', theta-) - Q (st, at, theta))^2
+Loss = greedy strategy ---> starts high and decreases over time
 
-#Loss = E [(rt + GAMMA * max(Q_st+1, a', theta-) - Q (st, at, theta))^2
-#Loss = greedy strategy ---> starts high and decreases over time
+if random_number < epsilon:
+   select_random_action()
+else:
+   select_action_with_highest_q_value()
 
-#if random_number < epsilon:
-#    select_random_action()
-#else:
-#    select_action_with_highest_q_value()
-
-# Genetic Algorithm - Fitness Function
+Genetic Algorithm - Fitness Function
+"""
 
 class QLearningAgent:
 
@@ -143,36 +145,38 @@ class QLearningAgent:
         return final_move
 
 
-def train():
+def train_and_record(duration):
     plotter = TrainingPlot() # To store game scores for plotting
     plot_scores = [] # To store mean scores for plotting  
     plot_mean_scores = []  # To store mean scores for plotting 
-    total_score = 0 # Total score across all games
-    record = 0 # Record score obtained in a game
-    stats_list = []  # To store statistics for plotting
-    snake_sizes_data = np.zeros((1, 1))  # Initial placeholder for snake size data
+    total_score = 0 
+    record = 0
     agent = QLearningAgent() # Initialize the agent
     game = SnakeGameAI() # Initialize the game environment
 
-    while True:
-        # Get the old state from the game
+    start_time = time.time()
+    record_duration = 20  # Duration to record in seconds
+    recording_started = False
+    images = []
+
+    while time.time() - start_time < 5*60 + record_duration:
         state_old = agent.get_state(game)
-
-        # Choose an action based on the old state
         final_move = agent.get_action(state_old)
-
-        # Perform the chosen action in the game and get the new state
         reward, done, score = game.play_step(final_move)
         state_new = agent.get_state(game)
-
-        # Train the agent using short memory (single experience)
         agent.train_short_memory(state_old, final_move, reward, state_new, done)
-
-        # Store the experience in the agent's memory
         agent.remember(state_old, final_move, reward, state_new, done)
 
+        if time.time() - start_time >= 5 * 60:
+            # Start recording after 5 minutes
+            recording_started = True
+
+        if recording_started:
+            screen = pygame.surfarray.array3d(game.display)
+            screen = np.transpose(screen, (1, 0, 2))
+            images.append(screen)
+
         if done:
-            # Train the agent's long-term memory and plot the results
             game._init_game()
             agent.n_games += 1
             agent.train_long_memory()
@@ -183,75 +187,16 @@ def train():
 
             print('Game', agent.n_games, 'Score', score, 'Record:', record)
 
-            # Update scores for plotting
             plot_scores.append(score)
             total_score += score
             mean_score = total_score / agent.n_games
             plot_mean_scores.append(mean_score)
             plotter.update(plot_scores, plot_mean_scores)
-            #if agent.n_games == 10:  # Set the number of games to generate the GIF
-            #   plotter.create_gif()  # Generate the GIF after 200 games
-            #  break  # End the training loop
 
+    # Save captured frames as a GIF using imageio
+    imageio.mimsave('snake_game.gif', images, fps= 60)
+    pygame.quit()
 
-
-#class GeneticAlgorithm:
-    def __init__(self, population_size, param_ranges):
-        self.population_size = population_size
-        self.param_ranges = param_ranges
-
-    def generate_population(self):
-        # Generate initial population of parameters
-        population = []
-        for _ in range(self.population_size):
-            params = {param: random.uniform(param_range[0], param_range[1])
-                      for param, param_range in self.param_ranges.items()}
-            population.append(params)
-        return population
-    
-    def evolve(self):
-        population = self.generate_population()
-
-        for generation in range(num_generations):
-            # Train Q-learning agents with parameters from the population
-            agents = [QLearningAgent(params) for params in population]
-            for agent in agents:
-                agent.train()
-                agent.evaluate()  # Evaluate the agent's performance
-
-            # Select top-performing agents for genetic operations
-            top_agents = select_top_agents(agents)
-
-            # Apply genetic operations (crossover and mutation)
-            new_population = crossover_and_mutation(top_agents)
-
-            population = new_population
-
-        # Extract the best-performing agent from the final population
-        best_agent_params = get_best_agent_params(population)
-        best_agent = QLearningAgent(best_agent_params)
-        return best_agent
-
-
-if __name__ == '__main__':
-    train()
-
-# if __name2__ == '__main__':
-
-#     # Define parameter ranges for genetic algorithm
-#     param_ranges = {
-#         "learning_rate": LEARNING_RATE_GA,
-#         "epsilon": (0.1, 0.5),
-#         # Add other Q-learning hyperparameters here
-#     }
-
-#     # Initialize genetic algorithm -> Optimize agent parameters (Defining which parameters)
-#     ga = GeneticAlgorithm(population_size=10, param_ranges=param_ranges)
-
-#     # Evolve and find the best Q-learning agent parameters
-#     best_agent = ga.evolve()
-
-#     # Train the best Q-learning agent with the optimal parameters
-#     best_agent.train()
-
-#     train()
+if __name__ == "__main__":
+    # Call train_and_record function with a 5-minute duration
+    train_and_record(20)  # Duration in seconds (5 minutes)
