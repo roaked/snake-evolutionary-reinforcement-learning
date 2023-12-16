@@ -146,7 +146,7 @@ class QLearningAgent:
         return final_move
 
 
-def train_and_record(duration):
+def train_and_record(duration,SPEED):
     plotter = TrainingPlot() # To store game scores for plotting
     plot_scores = [] # To store mean scores for plotting  
     plot_mean_scores = []  # To store mean scores for plotting 
@@ -157,10 +157,11 @@ def train_and_record(duration):
 
     start_time = time.time()
     record_duration = 20  # Duration to record in seconds
+    frame_time = 1 / SPEED  # Time per frame based on the snake's speed
     recording_started = False
     images = []
 
-    while time.time() - start_time < 5*60 + record_duration:
+    while time.time() - start_time < 0 + record_duration:
         state_old = agent.get_state(game)
         final_move = agent.get_action(state_old)
         reward, done, score = game.play_step(final_move)
@@ -195,9 +196,9 @@ def train_and_record(duration):
             plotter.update(plot_scores, plot_mean_scores)
 
     # Save captured frames as a GIF using imageio
-    imageio.mimsave('snake_game.gif', images, fps= 60)
+    imageio.mimsave('snake_game.gif', images, fps=SPEED)
     pygame.quit()
 
 if __name__ == "__main__":
     # Call train_and_record function with a 5-minute duration
-    train_and_record(20)  # Duration in seconds (5 minutes)
+    train_and_record(20,160)  # Duration in seconds (5 minutes)
