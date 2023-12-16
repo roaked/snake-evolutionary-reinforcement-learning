@@ -20,6 +20,10 @@ BATCH_SIZE = 1000 # Batch size for training
 ALPHA = 0.001  # Learning rate for the model
 LEARNING_RATE_GA = (0.1, 0.9)
 
+# WINDOW SIZE
+HEIGHT2 = 600
+WIDTH2 = 1000
+
 """
 Deep Q-Learning 
 Q new value = Q current   + Learn Rate * [ Reward + Discount Rate * Max Future Expected Reward - Q_current ]
@@ -114,7 +118,7 @@ class QLearningAgent:
 
     def remember(self, state, action, reward, next_state, done):
         # Store experience (state, action, reward, next_state, done) in memory
-        self.memory.append((state, action, reward, next_state, done)) 
+        self.memory.append((state, action, reward, next_state, done))
 
     def train_long_memory(self):
         # Sample from memory and perform a training step using QTrainer
@@ -146,7 +150,7 @@ class QLearningAgent:
         return final_move
 
 
-def train_and_record(record_duration):
+def train_and_record():
     plotter = TrainingPlot() # To store game scores for plotting
     plot_scores = [] # To store mean scores for plotting  
     plot_mean_scores = []  # To store mean scores for plotting 
@@ -154,17 +158,15 @@ def train_and_record(record_duration):
     record = 0
     agent = QLearningAgent() # Initialize the agent
     game = SnakeGameAI() # Initialize the game environment
-
     start_time = time.time()
+    record_duration = 100000
     recording_started = False
     images = []
 
-    
-
-    while time.time() - start_time < record_duration:
+    while True: #time.time() - start_time < record_duration:
         state_old = agent.get_state(game)
         final_move = agent.get_action(state_old)
-        reward, done, score = game.play_step(final_move, userControl)
+        reward, done, score = game.play_step(final_move)
         state_new = agent.get_state(game)
         agent.train_short_memory(state_old, final_move, reward, state_new, done)
         agent.remember(state_old, final_move, reward, state_new, done)
@@ -201,44 +203,38 @@ def train_and_record(record_duration):
             plot_mean_scores.append(mean_score)
             plotter.update(plot_scores, plot_mean_scores)
 
-    # Save captured frames
-    imageio.mimsave('snake_game.gif', images, fps=60)
-    pygame.quit()
+    # # Save captured frames
+    # imageio.mimsave('snake_game.gif', images, fps=60)
+    # pygame.quit()
+            
 
-if __name__ == "__main__":
+if __name__ == "__main__":   
+    train_and_record()         
 
-    userControl = int(input("Choose 1 for autonomous play or 2 for user control: \n"))
+# if __name__ == "__main__":
+
+#     userControl = int(input("Choose 1 for autonomous play or 2 for user control: \n"))
     
-    while(userControl != 1 and userControl != 2):
-        userControl = int(input("Choose 1 for autonomous play or 2 for user control: \n"))
+#     while(userControl != 1 and userControl != 2):
+#         userControl = int(input("Choose 1 for autonomous play or 2 for user control: \n"))
 
-    if userControl == 2:
+#     if userControl == 2:##user control
 
-        game = SnakeGameAI()
-        # Initialize user_input
-        user_input = np.array([1, 0, 0])  # Default: Move right initially
+#         game = SnakeGameAI(width=WIDTH2, height=HEIGHT2)
 
-        # Main game loop
-        while True:
-            # Collecting user input
-            keys = pygame.key.get_pressed()
-            if keys[pygame.K_UP]:
-                user_input = np.array([0, 0, 1])  # Move up
-            elif keys[pygame.K_DOWN] and user_input[2] != 1:
-                user_input = np.array([0, 1, 0])  # Move down
-            elif keys[pygame.K_LEFT] and user_input[0] != 1:
-                user_input = np.array([1, 0, 0])  # Move left
-            elif keys[pygame.K_RIGHT] and user_input[0] != 1:
-                user_input = np.array([0, 0, 0])  # Move right
+#         # Initialize user_input
+#         user_input = np.array([1, 0, 0])  # Default: Move straight initially
 
-            # Play a step in the game using the chosen input
-            reward, game_over, score = game.play_step(user_input, userControl)
+#         # Main game loop
+#         while True:
 
-            # Check if the game is over
-            if game_over:
-                print(f"Game Over! Your final score is {score}")
-                break
+#             # Play a step in the game using the chosen input
+#             game_over, score = game.death_control()
 
-    else:
-        # Call train_and_record function with given duration input
-        train_and_record(90)  # Duration in seconds
+#             # Check if the game is over
+#             if game_over:
+#                 print(f"Game Over! Your final score is {score}")
+#                 break
+#     else:
+#         # Call train_and_record function with given duration input
+#         train_and_record(1000000000)  # Duration in seconds
