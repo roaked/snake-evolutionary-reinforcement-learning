@@ -95,6 +95,11 @@ class SnakeGameAI:
 
     def play_step(self, action):
         self.frame_iteration += 1
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
         
         # Move the snake
         self._move(action)
