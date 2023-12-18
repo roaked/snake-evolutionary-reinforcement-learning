@@ -9,9 +9,15 @@ class LinearQNet(nn.Module):
         super().__init__()
         self.linear1 = nn.Linear(input_size, hidden_size)
         self.linear2 = nn.Linear(hidden_size, output_size)
+        self.dropout = nn.Dropout(0.2)  # Example: Adding dropout with p=0.2
+
+        # Initialize weights using Xavier initialization
+        nn.init.xavier_uniform_(self.linear1.weight)
+        nn.init.xavier_uniform_(self.linear2.weight)
 
     def forward(self, x):
         x = F.relu(self.linear1(x))
+        x = self.dropout(x)  # Applying dropout
         x = self.linear2(x)
         return x
 
@@ -37,29 +43,34 @@ class QTrainer:
         next_state = torch.tensor(next_state, dtype=torch.float)
         action = torch.tensor(action, dtype=torch.long)
         reward = torch.tensor(reward, dtype=torch.float)
-        # (n, x)
 
-        if len(state.shape) == 1:
-            # (1, x)
-            state = torch.unsqueeze(state, 0)
-            next_state = torch.unsqueeze(next_state, 0)
-            action = torch.unsqueeze(action, 0)
-            reward = torch.unsqueeze(reward, 0)
-            done = (done, )
+        pred = self.model(state)
+        target = pred.clone()
 
-        # 1: predicted Q values with current state
+        # Q-learning update rule
+        # Handling single-dimensional state and action tensors
+        if state.dim() == 1:  # (1,x)
+            state = state.unsqueeze(0)
+            next_state = next_state.unsqueeze(0)
+            action = action.unsqueeze(0)
+            reward = reward.unsqueeze(0)
+            done = (done,)
+
+        # Predicting Q-values based on current state-action pair
         pred = self.model(state)
 
+        # Clone the prediction for updating
         target = pred.clone()
         for idx in range(len(done)):
             Q_new = reward[idx]
             if not done[idx]:
                 Q_new = reward[idx] + self.gamma * torch.max(self.model(next_state[idx]))
 
-            target[idx][torch.argmax(action[idx]).item()] = Q_new
-    
+            action_idx = torch.argmax(action[idx]).item()
+            target[idx][action_idx] = Q_new
+
+        # Zero the gradients, compute loss, backpropagate, and update weights
         self.optimizer.zero_grad()
         loss = self.criterion(target, pred)
         loss.backward()
-
         self.optimizer.step()
