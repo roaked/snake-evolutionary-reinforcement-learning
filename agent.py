@@ -150,7 +150,7 @@ class QLearningAgent:
         return final_move
 
 
-def train_and_record():
+def train_and_record(record_duration):
     plotter = TrainingPlot() # To store game scores for plotting
     plot_scores = [] # To store mean scores for plotting  
     plot_mean_scores = []  # To store mean scores for plotting 
@@ -159,7 +159,6 @@ def train_and_record():
     agent = QLearningAgent() # Initialize the agent
     game = SnakeGameAI() # Initialize the game environment
     start_time = time.time()
-    record_duration = 100000
     recording_started = False
     images = []
 
@@ -180,11 +179,11 @@ def train_and_record():
         #     screen = pygame.surfarray.array3d(game.display)
         #     screen = np.transpose(screen, (1, 0, 2))
         #     images.append(screen)
-        # Capture the game screen as an image
 
-        screen = pygame.surfarray.array3d(game.display)
-        screen = np.transpose(screen, (1, 0, 2))
-        images.append(screen)
+        # Capture the game screen as an image
+        # screen = pygame.surfarray.array3d(game.display)
+        # screen = np.transpose(screen, (1, 0, 2))
+        # images.append(screen)
 
         if done:
             game._init_game()
@@ -208,33 +207,34 @@ def train_and_record():
     # pygame.quit()
             
 
-if __name__ == "__main__":   
-    train_and_record()         
+# if __name__ == "__main__":   
+#     train_and_record()         
 
-# if __name__ == "__main__":
+if __name__ == "__main__":
 
-#     userControl = int(input("Choose 1 for autonomous play or 2 for user control: \n"))
+    userControl = int(input("Choose 1 for autonomous play or 2 for user control: \n"))
     
-#     while(userControl != 1 and userControl != 2):
-#         userControl = int(input("Choose 1 for autonomous play or 2 for user control: \n"))
+    while(userControl != 1 and userControl != 2):
+        userControl = int(input("Choose 1 for autonomous play or 2 for user control: \n"))
 
-#     if userControl == 2:##user control
+    if userControl == 2:##user control
 
-#         game = SnakeGameAI(width=WIDTH2, height=HEIGHT2)
+        game = SnakeGameAI(width=WIDTH2, height=HEIGHT2)
 
-#         # Initialize user_input
-#         user_input = np.array([1, 0, 0])  # Default: Move straight initially
+        # Initialize user_input
+        user_input = np.array([1, 0, 0])  # Default: Move straight initially
 
-#         # Main game loop
-#         while True:
+        # Main game loop
+        while True:
 
-#             # Play a step in the game using the chosen input
-#             game_over, score = game.death_control()
+            # Play a step in the game using the chosen input
+            game_over, score = game.death_control()
 
-#             # Check if the game is over
-#             if game_over:
-#                 print(f"Game Over! Your final score is {score}")
-#                 break
-#     else:
-#         # Call train_and_record function with given duration input
-#         train_and_record(1000000000)  # Duration in seconds
+            # Check if the game is over
+            if game_over:
+                print(f"Game Over! Your final score is {score}")
+                break
+    else:
+        # Call train_and_record function with given duration input
+        # train_and_record(1000000000)  # Duration in seconds
+        train_and_record(record_duration=500000)

@@ -19,9 +19,12 @@ class GeneticAlgorithm:
         return population
     
     def select_top_agents(agent):
+            if fit == bestFit:
+                return population[individual]
         return 1
     
     def crossover_and_mutation(agent):
+
         return 1
     
     def get_best_agent_params(population):
@@ -67,3 +70,4 @@ best_agent = ga.evolve()
 # Train the best Q-learning agent with the optimal parameters
 best_agent.train()
 #train()
+GeneticAlgorithm(population_size=50, param_ranges=12)
