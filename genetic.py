@@ -2,11 +2,13 @@ import random
 from model import QTrainer
 from agent import QLearningAgent
 
+
 ####Implementation based on Bin Packing Genetic Algorithm
 
 class GeneticAlgorithm:
-    def __init__(self, population_size, param_ranges):
+    def __init__(self, population_size, param_ranges, fitness):
         self.population_size = population_size
+        self.fit = fitness
         self.param_ranges = param_ranges
 
     def generate_population(self):
@@ -18,10 +20,18 @@ class GeneticAlgorithm:
             population.append(params)
         return population
     
-    def select_top_agents(agent):
-            if fit == bestFit:
-                return population[individual]
-        return 1
+    def cost_function(self, record, deaths, avg_steps, penalties):
+        # record -> highest score achieved -> (total_score variable in agent)
+        # death -> number of deaths
+        # avg steps -> average number of steps to eat food
+        # pentalties (flexible) -> number of times it did 200 steps without eating any food
+        fitness = record * 500 - deaths * 150 - avg_steps * 100 - penalties * 100
+        
+    
+    # def select_top_agents(agent):
+    #         if fit == bestFit:
+    #             return population[individual]
+    #     return 1
     
     def crossover_and_mutation(agent):
 
@@ -62,12 +72,12 @@ param_ranges = {
     # other Q-learning hyperparameters here
 }
 
-ga = GeneticAlgorithm(population_size=10, param_ranges=param_ranges) # pop size = 10
+ga = GeneticAlgorithm(population_size=10, param_ranges=param_ranges, fitness=2) # pop size = 10
 
-# Evolve and find the best Q-learning agent parameters
-best_agent = ga.evolve()
+# # Evolve and find the best Q-learning agent parameters
+# best_agent = ga.evolve()
 
-# Train the best Q-learning agent with the optimal parameters
-best_agent.train()
-#train()
-GeneticAlgorithm(population_size=50, param_ranges=12)
+# # Train the best Q-learning agent with the optimal parameters
+# best_agent.train()
+# #train()
+# GeneticAlgorithm(population_size=50, param_ranges=12)

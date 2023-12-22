@@ -77,6 +77,8 @@ class SnakeGameAI:
         self.food = None
         self.frame_iteration = 0
         self._place_food()
+        self.deaths = 0 # need to update this later
+        self.steps = 0 # update this in play step
 
 
     def _place_food(self):
@@ -104,6 +106,8 @@ class SnakeGameAI:
         # Move the snake
         self._move(action)
         self.snake.insert(0, self.head)
+        self.steps += 1
+
         
         # Check for game over conditions
         game_over = False
@@ -112,7 +116,8 @@ class SnakeGameAI:
         if collision_or_frame_limit:
             game_over = True
             reward = -10
-            return reward, game_over, self.score
+            self.deaths += 1 # dying
+            return reward, game_over, self.score, self.deaths
         
         # Check if the snake has eaten the food
         if self.head == self.food:
@@ -127,7 +132,7 @@ class SnakeGameAI:
         self.clock.tick(SPEED)
         
         # Return game status and score
-        return reward, game_over, self.score
+        return reward, game_over, self.score, self.deaths, self.steps
 
 
     def is_collision(self, pt=None):
