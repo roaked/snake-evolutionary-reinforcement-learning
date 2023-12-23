@@ -124,7 +124,7 @@ class SnakeGameUser:
         
         if self.head == self.food: # spawn new food --> eat current food
             self.score += 1
-            for blocks in range(1):  
+            for blocks in range(10):  
                 self.snake.append(Point(self.food.x, self.food.y))
             self._place_food()
             self.steps = 0
