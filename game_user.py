@@ -45,7 +45,7 @@ BLACK = (0,0,0)
 
 # SETTINGS
 BLOCK_SIZE = 20
-SPEED2 = 20
+SPEED2 = 10
 
 class SnakeGameUser:
     
@@ -124,6 +124,8 @@ class SnakeGameUser:
         
         if self.head == self.food: # spawn new food --> eat current food
             self.score += 1
+            for block in range(1):  # Increase snake length by 2 blocks
+                self.snake.append(Point(self.food.x, self.food.y))
             self._place_food()
             self.steps = 0
         else:
