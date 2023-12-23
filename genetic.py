@@ -3,7 +3,7 @@ from model import QTrainer
 from agent import QLearningAgent
 
 
-####Implementation based on Bin Packing Genetic Algorithm
+####Implementation based on Bin Packing Genetic Algorithm -
 
 class GeneticAlgorithm:
     def __init__(self, population_size, param_ranges, fitness):
