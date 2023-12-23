@@ -46,7 +46,6 @@ BLACK = (0,0,0)
 # SETTINGS
 BLOCK_SIZE = 20
 SPEED = 300
-SPEED2 = 0.1
 
 class SnakeGameAI:
 
@@ -124,6 +123,7 @@ class SnakeGameAI:
             self.score += 1
             reward = 10
             self._place_food()
+            self.steps = 0
         else:
             self.snake.pop()
         

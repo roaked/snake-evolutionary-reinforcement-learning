@@ -10,8 +10,6 @@ import pygame
 import numpy as np
 from collections import deque
 from game import SnakeGameAI, Direction, Point
-from game_user import SnakeGameUser, Direction, Point
-
 from model import LinearQNet, QTrainer
 from plotme import TrainingPlot
 
@@ -209,34 +207,22 @@ def train_and_record(record_duration):
     # pygame.quit()
             
 
-# if __name__ == "__main__":   
-#     train_and_record()         
+if __name__ == "__main__":   
+    train_and_record(record_duration=500000)         
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
 
-    userControl = int(input("Choose 1 for autonomous play or 2 for user control: \n"))
+
+#     userControl = int(input("Choose 1 for autonomous play or 2 for user control: \n"))
     
-    while(userControl != 1 and userControl != 2):
-        userControl = int(input("Choose 1 for autonomous play or 2 for user control: \n"))
+#     while(userControl != 1 and userControl != 2):
+#         userControl = int(input("Choose 1 for autonomous play or 2 for user control: \n"))
 
-    if userControl == 2:##user control
+#     if userControl == 2:##user control
 
-        game_user = SnakeGameUser(width=WIDTH2, height=HEIGHT2)
-        game = game_user
-        # Initialize user_input
-        user_input = np.array([1, 0, 0])  # Default: Move straight initially
+#         game = game_user
 
-        # Main game loop
-        while True:
-
-            # Play a step in the game using the chosen input
-            game_over, score = game.death_control()
-
-            # Check if the game is over
-            if game_over:
-                print(f"Game Over! Your final score is {score}")
-                break
-    else:
-        # Call train_and_record function with given duration input
-        # train_and_record(1000000000)  # Duration in seconds
-        train_and_record(record_duration=500000)
+#     else:
+#         # Call train_and_record function with given duration input
+#         # train_and_record(1000000000)  # Duration in seconds
+#         train_and_record(record_duration=500000)
