@@ -10,6 +10,8 @@ import pygame
 import numpy as np
 from collections import deque
 from game import SnakeGameAI, Direction, Point
+from game_user import SnakeGameUser, Direction, Point
+
 from model import LinearQNet, QTrainer
 from plotme import TrainingPlot
 
@@ -219,8 +221,8 @@ if __name__ == "__main__":
 
     if userControl == 2:##user control
 
-        game = SnakeGameAI(width=WIDTH2, height=HEIGHT2)
-
+        game_user = SnakeGameUser(width=WIDTH2, height=HEIGHT2)
+        game = game_user
         # Initialize user_input
         user_input = np.array([1, 0, 0])  # Default: Move straight initially
 

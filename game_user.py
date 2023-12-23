@@ -45,10 +45,10 @@ BLACK = (0,0,0)
 
 # SETTINGS
 BLOCK_SIZE = 20
-SPEED = 300
+# SPEED = 300
 SPEED2 = 0.1
 
-class SnakeGameAI:
+class SnakeGameUser:
 
     def __init__(self, width = WIDTH, height = HEIGHT):
         #window display
@@ -237,6 +237,11 @@ class SnakeGameAI:
             pygame.K_DOWN: Direction.DOWN
         }
 
+        keys = pygame.key.get_pressed()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
 
         for key, direction in direction_map.items():
             if keys[key]:
