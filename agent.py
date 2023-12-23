@@ -1,16 +1,9 @@
-##creating venv with miniconda
-##conda pipenv -n "name here" python=3.7
-##conda activate "name here"
-
-import time
-import imageio
 import torch
 import random
 import pygame
 import numpy as np
 from collections import deque
 from game import SnakeGameAI, Direction, Point
-from game_user import SnakeGameUser
 from model import LinearQNet, QTrainer
 from plotme import TrainingPlot
 
