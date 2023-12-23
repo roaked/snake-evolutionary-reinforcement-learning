@@ -106,7 +106,7 @@ class SnakeGameAI:
         # Move the snake
         self._move(action)
         self.snake.insert(0, self.head)
-        self.steps += 1
+        # self.steps += 1
 
         
         # Check for game over conditions
