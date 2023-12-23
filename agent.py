@@ -21,10 +21,6 @@ BATCH_SIZE = 1000 # Batch size for training
 ALPHA = 0.001  # Learning rate for the model
 LEARNING_RATE_GA = (0.1, 0.9)
 
-# WINDOW SIZE
-HEIGHT2 = 600
-WIDTH2 = 1000
-
 """
 Deep Q-Learning 
 Q new value = Q current   + Learn Rate * [ Reward + Discount Rate * Max Future Expected Reward - Q_current ]
