@@ -45,7 +45,7 @@ BLACK = (0,0,0)
 
 # SETTINGS
 BLOCK_SIZE = 20
-SPEED2 = 20
+SPEED2 = 15
 
 class SnakeGameUser:
     
