@@ -31,6 +31,7 @@ class GeneticAlgorithm:
     # def select_top_agents(agent):
     #         if fit == bestFit:
     #             return population[individual]
+    #  
     #     return 1
     
     def crossover_and_mutation(agent):
