@@ -10,6 +10,7 @@ import pygame
 import numpy as np
 from collections import deque
 from game import SnakeGameAI, Direction, Point
+from game_user import SnakeGameUser
 from model import LinearQNet, QTrainer
 from plotme import TrainingPlot
 
@@ -158,32 +159,14 @@ def train_and_record(record_duration):
     record = 0
     agent = QLearningAgent() # Initialize the agent
     game = SnakeGameAI() # Initialize the game environment
-    start_time = time.time()
-    recording_started = False
-    images = []
 
-    while True: #time.time() - start_time < record_duration:
+    while True: 
         state_old = agent.get_state(game)
         final_move = agent.get_action(state_old)
         reward, done, score, deaths, stepped = game.play_step(final_move)
         state_new = agent.get_state(game)
         agent.train_short_memory(state_old, final_move, reward, state_new, done)
         agent.remember(state_old, final_move, reward, state_new, done)
-
-        #modify this if you want to record for >5mins
-        # if time.time() - start_time >= 5 * 60:
-        #     # Start recording after 5 minutes
-        #     recording_started = True
-            
-        # if recording_started:
-        #     screen = pygame.surfarray.array3d(game.display)
-        #     screen = np.transpose(screen, (1, 0, 2))
-        #     images.append(screen)
-
-        # Capture the game screen as an image
-        # screen = pygame.surfarray.array3d(game.display)
-        # screen = np.transpose(screen, (1, 0, 2))
-        # images.append(screen)
 
         if done:
             game._init_game()
@@ -202,27 +185,3 @@ def train_and_record(record_duration):
             plot_mean_scores.append(mean_score)
             plotter.update(plot_scores, plot_mean_scores)
 
-    # # Save captured frames
-    # imageio.mimsave('snake_game.gif', images, fps=60)
-    # pygame.quit()
-            
-
-if __name__ == "__main__":   
-    train_and_record(record_duration=500000)         
-
-# if __name__ == "__main__":
-
-
-#     userControl = int(input("Choose 1 for autonomous play or 2 for user control: \n"))
-    
-#     while(userControl != 1 and userControl != 2):
-#         userControl = int(input("Choose 1 for autonomous play or 2 for user control: \n"))
-
-#     if userControl == 2:##user control
-
-#         game = game_user
-
-#     else:
-#         # Call train_and_record function with given duration input
-#         # train_and_record(1000000000)  # Duration in seconds
-#         train_and_record(record_duration=500000)

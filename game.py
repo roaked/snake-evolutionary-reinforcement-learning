@@ -30,8 +30,8 @@ Point = namedtuple('Point', 'x, y')
 DIFFICULTY = 25
 
 # WINDOW SIZE
-HEIGHT = 640
-WIDTH = 640
+HEIGHT = 680
+WIDTH = 680
 
 # RGB COLORS
 CYAN = (25,140,140)
@@ -45,7 +45,7 @@ BLACK = (0,0,0)
 
 # SETTINGS
 BLOCK_SIZE = 20
-SPEED = 300
+SPEED = 20
 
 class SnakeGameAI:
 
