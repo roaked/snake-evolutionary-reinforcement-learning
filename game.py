@@ -38,7 +38,7 @@ CYAN = (25,140,140)
 DARKCYAN = (0,102,102)
 WHITE = (255, 255, 255)
 RED = (200,0,0)
-GREY = (18,18,18)
+GREY = (22,22,22)
 BLUE1 = (0, 0, 255)
 BLUE2 = (0, 100, 255)
 BLACK = (0,0,0)
@@ -154,7 +154,7 @@ class SnakeGameAI:
 
 
     def _update_ui(self):
-        self.display.fill(BLACK)
+        self.display.fill(GREY)
 
         # Draw the snake
         for pt in self.snake:
