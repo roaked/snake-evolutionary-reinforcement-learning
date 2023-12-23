@@ -45,10 +45,10 @@ BLACK = (0,0,0)
 
 # SETTINGS
 BLOCK_SIZE = 20
-SPEED = 300
+# SPEED = 300
 SPEED2 = 0.1
 
-class SnakeGameAI:
+class SnakeGameUser:
 
     def __init__(self, width = WIDTH, height = HEIGHT):
         #window display
