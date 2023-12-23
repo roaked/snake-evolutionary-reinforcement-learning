@@ -106,8 +106,12 @@ class SnakeGameAI:
         # Move the snake
         self._move(action)
         self.snake.insert(0, self.head)
+<<<<<<< HEAD
         # self.steps += 1
 
+=======
+        self.steps += 1
+>>>>>>> 79826f8e2c5abab4da71c76097fe16a6c7fbbf5d
         
         # Check for game over conditions
         game_over = False
@@ -117,7 +121,8 @@ class SnakeGameAI:
             game_over = True
             reward = -10
             self.deaths += 1 # dying
-            return reward, game_over, self.score, self.deaths
+            self.steps = 0
+            return reward, game_over, self.score, self.deaths, self.steps
         
         # Check if the snake has eaten the food
         if self.head == self.food:

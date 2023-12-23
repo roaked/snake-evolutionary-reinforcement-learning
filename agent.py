@@ -165,13 +165,13 @@ def train_and_record(record_duration):
     while True: #time.time() - start_time < record_duration:
         state_old = agent.get_state(game)
         final_move = agent.get_action(state_old)
-        reward, done, score = game.play_step(final_move)
+        reward, done, score, deaths, stepped = game.play_step(final_move)
         state_new = agent.get_state(game)
         agent.train_short_memory(state_old, final_move, reward, state_new, done)
         agent.remember(state_old, final_move, reward, state_new, done)
 
         #modify this if you want to record for >5mins
-        # if time.time() - start_time >= 5:
+        # if time.time() - start_time >= 5 * 60:
         #     # Start recording after 5 minutes
         #     recording_started = True
             

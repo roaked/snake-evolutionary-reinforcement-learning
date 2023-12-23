@@ -21,16 +21,17 @@ class GeneticAlgorithm:
         return population
     
     def cost_function(self, record, deaths, avg_steps, penalties):
-        # record -> highest score achieved -> (total_score variable in agent)
+        # record -> highest score achieved -> (total_score variable in agent.py)
         # death -> number of deaths
         # avg steps -> average number of steps to eat food
-        # pentalties (flexible) -> number of times it did 200 steps without eating any food
+        # penalties (flexible) -> number of times it did 200 steps without eating any food
         fitness = record * 500 - deaths * 150 - avg_steps * 100 - penalties * 100
         
     
     # def select_top_agents(agent):
     #         if fit == bestFit:
     #             return population[individual]
+    #  
     #     return 1
     
     def crossover_and_mutation(agent):
