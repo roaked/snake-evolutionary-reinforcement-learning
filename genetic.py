@@ -6,7 +6,7 @@ import numpy as np
 To do list:
 - Fitness function optimization -- Retrieve all input variables from other functions
 - Implement GeneticAlgorithm() object in the agent.py function
-- Check 'param_ranges' dictionary / hash map for new optimziation parameters in the Deep Q Network
+- Check 'param_ranges' dictionary / hash map for new optimization params of the Deep Q Network
 - Results and test
 """
 ##############################################################################################################################
