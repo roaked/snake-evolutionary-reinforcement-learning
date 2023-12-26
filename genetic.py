@@ -125,7 +125,6 @@ class GeneticAlgorithm:
             fitness_scores.append(fitness)
 
         return fitness_scores
-        
     
     def selection(self, population, fitness_scores):
         # Normalize fitness scores to probabilities
@@ -140,8 +139,33 @@ class GeneticAlgorithm:
 
         return new_population
     
-    def crossover(self, parent1, parent2): #offspring from 2 parents
-        pass
+    def elitist_selection(population, fitness_scores, num_elites): # Not using but could select the 'Elite' individuals with highest p
+        # Get indices of individuals sorted by fitness (descending order)
+        sorted_indices = sorted(range(len(fitness_scores)), key=lambda i: fitness_scores[i], reverse=True)
+        
+        # Select the top individuals as elites
+        new_population = [population[idx] for idx in sorted_indices[:num_elites]]
+    
+        return new_population
+    
+    selected_population = selection(population = population, fitness_scores = fitness_scores) # Put at the end of code after implementation
+    parent1, parent2 = random.sample(selected_population, 2) # Put at the end of code after implementation
+    
+    def crossover(self, parent1, parent2):
+
+        assert len(parent1) == len(parent2) # Only if same len
+
+        # Crossover point // Similar to Bin Packing Problem (BPP)
+        crossover_point = random.randint(1, len(parent1) - 1)
+
+        # Create offspring by combining parent genes
+        offspring1 = parent1[:crossover_point] + parent2[crossover_point:]
+        offspring2 = parent2[:crossover_point] + parent1[crossover_point:]
+
+        return offspring1, offspring2
+    
+    
+    offspring1, offspring2 = crossover(parent1, parent2)  # Put at the end of code after implementation
 
     def mutation(self, chromosome): #randomize changes
         pass
