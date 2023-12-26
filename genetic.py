@@ -26,10 +26,10 @@ param_ranges = {
 
 class GeneticAlgorithm:
     def __init__(self, population_size, fitness, chromosome_length, param_ranges):
-        self.population_size = population_size
+        self.population_size = population_size #20 to 50 individuals empirical value
         self.fit = fitness
-        self.param_ranges = param_ranges
-        self.chromosome_length = chromosome_length
+        self.param_ranges = param_ranges #dictionary upstairs
+        self.chromosome_length = chromosome_length # c_length = n_in + neurons*n_out + n_out = (11*256) + 256 + (256*3) + 3 = 3075
         self.population = self.generate_population()
 
     def heuristic_initialization(self, param_ranges):
