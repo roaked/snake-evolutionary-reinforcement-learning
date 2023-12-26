@@ -24,13 +24,11 @@ param_ranges = {
     #'MAX_MEMORY' -> capacity of replay memory
 }
 
-GENERATIONS = 1000
-LEARNING_RATE_GA = (0.1, 0.9)
-
 class GeneticAlgorithm:
-    def __init__(self, population_size, fitness, chromosome_length, param_ranges = param_ranges):
+    def __init__(self, population_size, fitness, chromosome_length, param_ranges):
         self.population_size = population_size
         self.fit = fitness
+        self.param_ranges = param_ranges
         self.chromosome_length = chromosome_length
         self.population = self.generate_population()
 
@@ -38,13 +36,17 @@ class GeneticAlgorithm:
         individual = [random.uniform(param_range[0], param_range[1]) for param_range in self.param_ranges.values()]
         return individual
 
-    def generate_population(self):
+    def generate_population(self, population_size, param_ranges):
         population = []
-        # Heuristic initialization
-        for _ in range(self.population_size):
-            # Create an individual with heuristic initialization
-            individual = self.heuristic_initialization()
-            population.append(individual)
+        for _ in range(population_size):
+            params = {}
+            for param, value_range in param_ranges.items():
+                if isinstance(value_range, tuple):  # Continuous parameters
+                    params[param] = random.uniform(value_range[0], value_range[1])
+                elif isinstance(value_range, list):  # Discrete parameters
+                    params[param] = random.choice(value_range)
+                # Add conditions for handling integer or other parameter types if needed
+            population.append(params)
         return population
     
     #def initialize_population(self):
