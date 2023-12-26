@@ -1,7 +1,7 @@
 import random, time, itertools
 import numpy as np
 
-"""Variables to optimize in the Deep-Q-Network using Genetic Algorithm"""
+"""What we want or can optimize in the Deep-Q-Network using Genetic Algorithm"""
 
 param_ranges = {
     # Continuous parameters
@@ -23,14 +23,23 @@ param_ranges = {
     #'MAX_MEMORY' -> capacity of replay memory
 }
 
+"""Variables to use for the Genetic Algorithm"""
+
+MUTATION_RATE = 0.1
+
+"""(...) values typically range between 1% to 10%. A mutation rate of 1% implies that, on average, 
+1 in every 100 genes will undergo a mutation per generation. Higher mutation rates, like 5% or 10%, 
+can introduce more exploration but might risk losing some beneficial traits learned through crossover."""
+
 class GeneticAlgorithm:
 
 
-    def __init__(self, population_size, chromosome_length, param_ranges):
+    def __init__(self, population_size, chromosome_length, param_ranges, mutation_rate):
         self.population_size = population_size #20 to 50 individuals empirical value
         self.param_ranges = param_ranges #dictionary upstairs
         self.chromosome_length = chromosome_length # c_length = n_in + neurons*n_out + n_out = (11*256) + 256 + (256*3) + 3 = 3075
         self.population = self.generate_population()
+        self.mutation_rate = mutation_rate
 
 
 
@@ -160,7 +169,7 @@ class GeneticAlgorithm:
 
         assert len(parent1) == len(parent2) # Only if same len
 
-        # Crossover point // Similar to Bin Packing Problem (BPP)
+        # Crossover point // Similar to Bin Packing Problem (BPP) ----> (Can check in MATLAB)
         crossover_point = random.randint(1, len(parent1) - 1)
 
         # Create offspring by combining parent genes
@@ -172,8 +181,23 @@ class GeneticAlgorithm:
     
     offspring1, offspring2 = crossover(parent1, parent2)  # Put at the end of code after implementation
 
-    def mutation(self, chromosome): #randomize changes
-        pass
+
+    """According to Genetic Algorithm, after crossover (breeding), we apply mutation to the resulting offspring to introduce
+    small changes to their genetic material depending on the mutation rate, this helps explores new areas of solution space"""
+    def mutation(individual, mutation_rate):
+
+        mutated_individual = []
+        for gene in individual:
+            if random.random() < mutation_rate:
+                # Flip the bit
+                mutated_gene = 1 - gene
+            else:
+                mutated_gene = gene
+            mutated_individual.append(mutated_gene)
+        return mutated_individual
+    
+    mutated_offspring1 = mutation(offspring1, mutation_rate = MUTATION_RATE)
+    mutated_offspring2 = mutation(offspring2, mutation_rate = MUTATION_RATE)
     
     def evolve(self, generations):
         best_agents = [] # store best
