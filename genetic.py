@@ -14,7 +14,6 @@ class GeneticAlgorithm:
     def __init__(self, population_size, fitness, chromosome_length):
         self.population_size = population_size
         self.fit = fitness
-        self.param_ranges = param_ranges
         self.chromosome_length = chromosome_length
         self.population = self.generate_population()
 
@@ -39,8 +38,9 @@ class GeneticAlgorithm:
         
     
     def selection(self, agent): #based on fitness function
-        if fit == bestFit:
-            return population[individual]
+        bestFit = None
+        #if fit == bestFit:
+            #return population[individual]
         pass
     
     def crossover(self, parent1, parent2): #offspring from 2 parents
