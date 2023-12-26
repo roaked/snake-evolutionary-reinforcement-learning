@@ -45,7 +45,7 @@ BLACK = (0,0,0)
 
 # SETTINGS
 BLOCK_SIZE = 20
-SPEED = 20
+SPEED = 300
 
 class SnakeGameAI:
 

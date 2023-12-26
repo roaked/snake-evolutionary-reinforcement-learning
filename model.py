@@ -3,6 +3,24 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 import os
+import random
+from collections import deque
+
+
+class ReplayBuffer:
+    def __init__(self, capacity):
+        self.buffer = deque(maxlen = capacity)
+
+    def push(self, transition):
+        self.buffer.append(transition)
+
+    def sample(self, batch_size):
+        batch = random.sample(self.buffer, batch_size)
+        state, action, reward, next_state, done = zip(*batch)
+        return state, action, reward, next_state, done
+
+    def __len__(self):
+        return len(self.buffer)
 
 class LinearQNet(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
@@ -37,8 +55,17 @@ class QTrainer:
         self.model = model
         self.optimizer = optim.Adam(model.parameters(), lr=self.lr)
         self.criterion = nn.MSELoss()
+        self.target_update_freq = target_update_freq
+        self.target_update_counter = 0
 
-    def train_step(self, state, action, reward, next_state, done):
+    def update_target(self):
+        self.target_model.load_state_dict(self.model.state_dict())
+
+    def train_step(self, state, action, reward, next_state, done, ReplayBuffer, batch_size):
+
+        # if len(ReplayBuffer) < batch_size:  ###ERROR?
+        #     return
+        
         state = torch.tensor(state, dtype=torch.float)
         next_state = torch.tensor(next_state, dtype=torch.float)
         action = torch.tensor(action, dtype=torch.long)
@@ -64,7 +91,7 @@ class QTrainer:
         for idx in range(len(done)):
             Q_new = reward[idx]
             if not done[idx]:
-                Q_new = reward[idx] + self.gamma * torch.max(self.model(next_state[idx]))
+                Q_new = reward[idx] + self.gamma * torch.max(self.model(next_state[idx])) #target model maybe?
 
             action_idx = torch.argmax(action[idx]).item()
             target[idx][action_idx] = Q_new
@@ -74,3 +101,18 @@ class QTrainer:
         loss = self.criterion(target, pred)
         loss.backward()
         self.optimizer.step()
+
+        # Update target network periodically
+        self.target_update_counter += 1
+        if self.target_update_counter % self.target_update_freq == 0:
+            self.update_target()
+
+    def train(self, replay_buffer, batch_size):
+        if len(replay_buffer) < batch_size:
+            return
+        
+        state, action, reward, next_state, done = replay_buffer.sample(batch_size)
+        self.train_step(state, action, reward, next_state, done)
+
+    def update_target(self):
+        self.target_model.load_state_dict(self.model.state_dict())

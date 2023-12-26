@@ -4,15 +4,8 @@ import pygame
 import numpy as np
 from collections import deque
 from game import SnakeGameAI, Direction, Point
-from model import LinearQNet, QTrainer
+from model import LinearQNet, QTrainer, ReplayBuffer
 from plotme import TrainingPlot
-
-###### IMMUTABLE VARIABLES
-
-MAX_MEMORY = 100_000 # Maximum memory for the agent  
-BATCH_SIZE = 1000 # Batch size for training
-ALPHA = 0.001  # Learning rate for the model
-LEARNING_RATE_GA = (0.1, 0.9)
 
 """
 Deep Q-Learning 
@@ -47,6 +40,13 @@ else:
 Genetic Algorithm - Fitness Function
 """
 
+###### IMMUTABLE VARIABLES
+
+MAX_MEMORY = 100_000 # Maximum memory for the agent  
+BATCH_SIZE = 1000 # Batch size for training
+ALPHA = 0.001  # Learning rate for the model
+LEARNING_RATE_GA = (0.1, 0.9)
+
 class QLearningAgent:
 
     def __init__(self):
@@ -55,7 +55,10 @@ class QLearningAgent:
         self.gamma = 0.9 # Discount factor for future rewards
         self.memory = deque(maxlen=MAX_MEMORY) # Replay memory for storing experiences
         self.model = LinearQNet(11, 256, 3) # Neural network model (input size, hidden size, output size) ----- GA
+        self.target_model = LinearQNet(11, 256, 3)
+        self.target_model.load_state_dict(self.model.state_dict())  # Sync initial weights
         self.trainer = QTrainer(self.model, lr=ALPHA, gamma=self.gamma) # QTrainer for model training -- GA
+        self.replay_buffer = ReplayBuffer(capacity=BATCH_SIZE)
 
 
     def get_state(self, game):
@@ -118,11 +121,11 @@ class QLearningAgent:
             mini_sample = self.memory
 
         states, actions, rewards, next_states, dones = zip(*mini_sample)
-        self.trainer.train_step(states, actions, rewards, next_states, dones)
+        self.trainer.train_step(states, actions, rewards, next_states, dones, ReplayBuffer, BATCH_SIZE)
 
     def train_short_memory(self, state, action, reward, next_state, done):
         # Perform a single training step using a single experience tuple
-        self.trainer.train_step(state, action, reward, next_state, done)
+        self.trainer.train_step(state, action, reward, next_state, done, ReplayBuffer, BATCH_SIZE)
 
     def get_action(self, state):
         # Select actions based on an epsilon-greedy strategy
@@ -174,3 +177,5 @@ def train_and_record(record_duration):
             plot_mean_scores.append(mean_score)
             plotter.update(plot_scores, plot_mean_scores)
 
+if __name__ == "__main__":   
+    train_and_record(10000)
