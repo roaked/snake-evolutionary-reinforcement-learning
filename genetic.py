@@ -50,16 +50,15 @@ CROSSOVER_RATE = 0.8
 POPULATION_SIZE = 20
 
 """Typical empirical values range from 20 to 50 individuals in a generation"""
-
-CHROMOSOME_LENGTH = 15
-
-"""According to param_ranges items"""
+ 
+CHROMOSOME_LENGTH, NUM_GENERATIONS = 15, 5 # param_ranges items
 
 class GeneticAlgorithm:
 
 
-    def __init__(self, POPULATION_SIZE, CHROMOSOME_LENGTH, param_ranges, MUTATION_RATE):
+    def __init__(self, POPULATION_SIZE, CHROMOSOME_LENGTH, param_ranges, MUTATION_RATE, NUM_GENERATIONS):
         self.population_size = POPULATION_SIZE 
+        self.num_generations = NUM_GENERATIONS
         self.param_ranges = param_ranges #dictionary upstairs
         self.chromosome_length = CHROMOSOME_LENGTH # c_length empri
         self.population = self.generate_population(self.population_size, self.param_ranges, self.chromosome_length)
@@ -236,7 +235,7 @@ class GeneticAlgorithm:
     ##############################################################################################################################
     """My notes"""
 
-    population = generate_population(population_size = POPULATION_SIZE, param_ranges = param_ranges, chromosome_length = chromosome_length)
+    population = generate_population(population_size = POPULATION_SIZE, param_ranges = param_ranges, chromosome_length = CHROMOSOME_LENGTH)
     fitness_scores = calculate_population_fitness(population = population)
     selected_population = selection(population = population, fitness_scores = fitness_scores) # Put at the end of code after implementation
     parent1, parent2 = random.sample(selected_population, 2) # Put at the end of code after implementation
@@ -299,6 +298,7 @@ class GeneticAlgorithm:
 # chromosome length = (11 * 256) + 256 + (256 * 3) + 3 = 3075 (neural network)
 
 if __name__ == "__main__": 
-    ga = GeneticAlgorithm(population_size = POPULATION_SIZE, chromosome_length = 3075, param_ranges = param_ranges) #Initialized  
-    best_agents = GeneticAlgorithm().genetic(num_generations = 5)
+    ga = GeneticAlgorithm(population_size = POPULATION_SIZE, chromosome_length = CHROMOSOME_LENGTH, param_ranges = param_ranges,
+                          mutation_rate = MUTATION_RATE) #Initialized  
+    best_agents = GeneticAlgorithm().genetic(num_generations = NUM_GENERATIONS)
     print(best_agents)
