@@ -34,12 +34,12 @@ can introduce more exploration but might risk losing some beneficial traits lear
 class GeneticAlgorithm:
 
 
-    def __init__(self, population_size, chromosome_length, param_ranges, mutation_rate):
+    def __init__(self, population_size, chromosome_length, param_ranges, MUTATION_RATE):
         self.population_size = population_size #20 to 50 individuals empirical value
         self.param_ranges = param_ranges #dictionary upstairs
         self.chromosome_length = chromosome_length # c_length = n_in + neurons*n_out + n_out = (11*256) + 256 + (256*3) + 3 = 3075
         self.population = self.generate_population()
-        self.mutation_rate = mutation_rate
+        self.mutation_rate = MUTATION_RATE
 
 
 
@@ -198,23 +198,38 @@ class GeneticAlgorithm:
     
     mutated_offspring1 = mutation(offspring1, mutation_rate = MUTATION_RATE)
     mutated_offspring2 = mutation(offspring2, mutation_rate = MUTATION_RATE)
-    
-    def evolve(self, generations):
-        best_agents = [] # store best
-        self.population = self.initialize_population()
 
-        for generation in range(generations):
+
+
+    ##############################################################################################################################
+
+    population = generate_population(population_size = population_size, param_ranges = param_ranges)
+    fitness_scores = calculate_population_fitness(population = population)
+    selected_population = selection(population = population, fitness_scores = fitness_scores) # Put at the end of code after implementation
+    parent1, parent2 = random.sample(selected_population, 2) # Put at the end of code after implementation
+    offspring1, offspring2 = crossover(parent1, parent2)  # Put at the end of code after implementation
+    mutated_offspring1 = mutation(offspring1, mutation_rate = MUTATION_RATE)
+    mutated_offspring2 = mutation(offspring2, mutation_rate = MUTATION_RATE)
+
+     ##############################################################################################################################
+
+    def genetic(self, num_generations, population_size, mutation_rate):
+
+        best_agents = [] # Store best
+        self.population = self.generate_population()
+
+        for generation in range(num_generations):
             # Evaluate fitness for each chromosome in the population
             fitness_scores = [self.fitness_function(chromosome) for chromosome in self.population]
 
             # Select high-performing chromosomes (using tournament selection)
-            selected_chromosomes = self.selection(fitness_scores)
+            selected_population = self.selection(fitness_scores)
 
             # Create offspring through crossover and mutation
             offspring = []
             for i in range(0, self.population_size, 2):
-                parent1 = selected_chromosomes[i]
-                parent2 = selected_chromosomes[i + 1]
+                parent1 = selected_population[i]
+                parent2 = selected_population[i + 1]
                 child1, child2 = self.crossover(parent1, parent2)
                 child1 = self.mutation(child1)
                 child2 = self.mutation(child2)
