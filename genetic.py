@@ -51,49 +51,51 @@ POPULATION_SIZE = 20
 
 """Typical empirical values range from 20 to 50 individuals in a generation"""
 
+CHROMOSOME_LENGTH = 15
+
+"""According to param_ranges items"""
 
 class GeneticAlgorithm:
 
 
-    def __init__(self, POPULATION_SIZE, chromosome_length, param_ranges, MUTATION_RATE):
+    def __init__(self, POPULATION_SIZE, CHROMOSOME_LENGTH, param_ranges, MUTATION_RATE):
         self.population_size = POPULATION_SIZE 
         self.param_ranges = param_ranges #dictionary upstairs
-        self.chromosome_length = chromosome_length # c_length = n_in + neurons*n_out + n_out = (11*256) + 256 + (256*3) + 3 = 3075
-        self.population = self.generate_population(self.population_size, self.param_ranges)
+        self.chromosome_length = CHROMOSOME_LENGTH # c_length empri
+        self.population = self.generate_population(self.population_size, self.param_ranges, self.chromosome_length)
         self.mutation_rate = MUTATION_RATE
         self.crossover_rate = CROSSOVER_RATE
 
 
 
-    def generate_population(self, population_size, param_ranges): #Random init or heuristic init (using prior info)
+    def generate_population(self, population_size, param_ranges, chromosome_length): #Random init or heuristic init (using prior info)
         #check if working
 
         population = []
         for _ in range(population_size):
             params = {}
-            for param, value_range in param_ranges.items():
+            for _ in range(chromosome_length):
+                for param, value_range in param_ranges.items():
 
-                #Heuristic Initialization
-                if param == 'learning_rate':
-                    params[param] = 0.01  # Heuristic init for learning rate --> Check agent.py
-                    
-                elif param == 'dropout_rate':
-                    params[param] = 0.2  # Heuristic init for dropout rate --> Check game.py
-                    
-                elif param == 'activation_function':
-                    params[param] = 'relu'  # Heuristic init for activation function --> Default
+                    # #Heuristic Initialization
+                    # if param == 'learning_rate':
+                    #     params[param] = 0.01  # Heuristic init for learning rate --> Check agent.py  
+                    # elif param == 'dropout_rate':
+                    #     params[param] = 0.2  # Heuristic init for dropout rate --> Check game.py    
+                    # elif param == 'activation_function':
+                    #     params[param] = 'relu'  # Heuristic init for activation function --> Default
 
-                #Random Initialization
-                if isinstance(value_range, tuple):  # Random init for continuous parameters
-                    params[param] = random.uniform(value_range[0], value_range[1])
-                elif isinstance(value_range, list):  # Discrete parameters
-                    params[param] = random.choice(value_range)
-                elif isinstance(value_range, int):  # Integer parameters
-                    params[param] = random.randint(value_range[0], value_range[1])
-                elif isinstance(value_range, str):  # String parameters
-                    params[param] = value_range  # Set the string value directly
-            population.append(params)
-        return population
+                    #Random Initialization
+                    if isinstance(value_range, tuple):  # Random init for continuous parameters
+                        params[param] = random.uniform(value_range[0], value_range[1])
+                    elif isinstance(value_range, list):  # Discrete parameters
+                        params[param] = random.choice(value_range)
+                    elif isinstance(value_range, int):  # Integer parameters
+                        params[param] = random.randint(value_range[0], value_range[1])
+                    elif isinstance(value_range, str):  # String parameters
+                        params[param] = value_range  # Set the string value directly
+                population.append(params)
+            return population
     
     
     def fitness_function(self, score, record, steps, collisions, same_positions): #from current state
@@ -236,7 +238,7 @@ class GeneticAlgorithm:
     ##############################################################################################################################
     """My notes"""
 
-    population = generate_population(population_size = POPULATION_SIZE, param_ranges = param_ranges)
+    population = generate_population(population_size = POPULATION_SIZE, param_ranges = param_ranges, chromosome_length = chromosome_length)
     fitness_scores = calculate_population_fitness(population = population)
     selected_population = selection(population = population, fitness_scores = fitness_scores) # Put at the end of code after implementation
     parent1, parent2 = random.sample(selected_population, 2) # Put at the end of code after implementation
