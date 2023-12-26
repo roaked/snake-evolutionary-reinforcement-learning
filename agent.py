@@ -6,6 +6,7 @@ from collections import deque
 from game import SnakeGameAI, Direction, Point
 from model import LinearQNet, QTrainer, ReplayBuffer
 from plotme import TrainingPlot
+from genetic import GeneticAlgorithm
 
 """
 Deep Q-Learning 
