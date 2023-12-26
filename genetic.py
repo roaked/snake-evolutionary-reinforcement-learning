@@ -130,13 +130,13 @@ class GeneticAlgorithm:
     def selection(self, population, fitness_scores):
         # Normalize fitness scores to probabilities
         total_fitness = sum(fitness_scores)
-        probabilities = [fitness / total_fitness for fitness in fitness_scores] # List Comprehension - Probabilities
+        probabilities = [fitness / total_fitness for fitness in fitness_scores] # List Comprehension - Probabilities Array
 
         # Select based on fitness (roulette wheel selection) // replace = True means one individual can be picked more than 1 time
         selected_indices = np.random.choice(len(population), size = self.population_size, replace = True, p = probabilities)
 
         # Create a new population based on the selected indices
-        new_population = [population[idx] for idx in selected_indices]
+        new_population = [population[idx] for idx in selected_indices] # List Comprehension - New population Array
 
         return new_population
     
