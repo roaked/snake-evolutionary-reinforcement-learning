@@ -49,7 +49,7 @@ class GeneticAlgorithm:
         self.population_size = POPULATION_SIZE 
         self.param_ranges = param_ranges #dictionary upstairs
         self.chromosome_length = chromosome_length # c_length = n_in + neurons*n_out + n_out = (11*256) + 256 + (256*3) + 3 = 3075
-        self.population = self.generate_population()
+        self.population = self.generate_population(self.population_size, self.param_ranges)
         self.mutation_rate = MUTATION_RATE
         self.crossover_rate = CROSSOVER_RATE
 
@@ -224,7 +224,7 @@ class GeneticAlgorithm:
 
     ##############################################################################################################################
     """My notes"""
-    
+
     population = generate_population(population_size = POPULATION_SIZE, param_ranges = param_ranges)
     fitness_scores = calculate_population_fitness(population = population)
     selected_population = selection(population = population, fitness_scores = fitness_scores) # Put at the end of code after implementation
@@ -238,14 +238,17 @@ class GeneticAlgorithm:
     def genetic(self, num_generations):
 
         best_agents = [] # Store best
-        population = self.generate_population(self.population_size, self.param_ranges)
+        #population = self.generate_population(self.population_size, self.param_ranges) #No need, already initialized in __init__
 
         for generation in range(num_generations):
             # Evaluate fitness for each chromosome in the population
-            fitness_scores = [self.fitness_function(chromosome) for chromosome in population]
+            fitness_scores = [self.fitness_function(chromosome) for chromosome in self.population]
+            fitness_scores2 = self.calculate_population_fitness(self.population) 
+            """Compare both"""
 
             # Select high-performing chromosomes (using tournament selection)
-            selected_population = self.selection(fitness_scores)
+            selected_population = self.selection(self.population, fitness_scores)
+            selected_population2 = self.selection(self.population, fitness_scores2)
 
             # Create offspring through crossover and mutation
             offspring = []
