@@ -11,24 +11,26 @@ from genetic import GeneticAlgorithm
 """
 Deep Q-Learning 
 Q new value = Q current   + Learn Rate * [ Reward + Discount Rate * Max Future Expected Reward - Q_current ]
-Q_new(s,a) = Q_current(s,a) + ALPHA [R (s,a) + GAMMA MAX Q'(s',a') - Q_current(s,a) ]
+Q_new(s,a) = Q_current(s,a) + ALPHA [R (s,a) + GAMMA MAX Q'(s',a') - Q_current(s,a) ]"""
 
 #########################################################################################################################
+"""
 ALPHA - LEARNING RATE DQN
 
 The learning rate determines the extent to which newly acquired information overrides old information. 
 It regulates how much the Q-values are updated based on new experiences.
-A higher learning rate means faster updates, but it might lead to instability or overshooting optimal values.
+A higher learning rate means faster updates, but it might lead to instability or overshooting optimal values."""
 
 #########################################################################################################################
+"""
 GAMMA - DISCOUNT RATE DQN
 
 The discount factor signifies the importance of future rewards compared to immediate rewards. 
 It determines how much the agent values future rewards over immediate ones. 
-A higher discount factor values long-term rewards more, influencing the agent’s decision-making.
+A higher discount factor values long-term rewards more, influencing the agent’s decision-making."""
 
 #########################################################################################################################
-EPSILON - EXPLORATION RATE Q_current -> Q_new using Bellman Equation
+"""EPSILON - EXPLORATION RATE Q_current -> Q_new using Bellman Equation
 
 Loss = E [(rt + GAMMA * max(Q_st+1, a', theta-) - Q (st, at, theta))^2
 Loss = greedy strategy ---> starts high and decreases over time
@@ -36,12 +38,9 @@ Loss = greedy strategy ---> starts high and decreases over time
 if random_number < epsilon:
    select_random_action()
 else:
-   select_action_with_highest_q_value()
+   select_action_with_highest_q_value()"""
 
-Genetic Algorithm - Fitness Function
-"""
-
-###### IMMUTABLE VARIABLES
+# IMMUTABLE VARIABLES
 
 MAX_MEMORY = 100_000 # Maximum memory for the agent  
 BATCH_SIZE = 1000 # Batch size for training
@@ -118,7 +117,7 @@ class QLearningAgent:
     """Sample from memory and perform a training step using QTrainer"""
     def train_long_memory(self):
         if len(self.memory) > BATCH_SIZE:
-            mini_sample = random.sample(self.memory, BATCH_SIZE) # list of tuples
+            mini_sample = random.sample(self.memory, BATCH_SIZE) # List of tuples
         else:
             mini_sample = self.memory
 
@@ -129,6 +128,8 @@ class QLearningAgent:
     def train_short_memory(self, state, action, reward, next_state, done):
         self.trainer.train_step(state, action, reward, next_state, done, ReplayBuffer, BATCH_SIZE)
 
+    """Select actions based on an epsilon-greedy strategy, balancing exploration and exploitation in the agent's decision-making process.
+    - 1. Epsilon Decay; 2. Action Selection; 3. Outcome"""
     def get_action(self, state):
         # Select actions based on an epsilon-greedy strategy
         self.epsilon = 80 - self.n_games
