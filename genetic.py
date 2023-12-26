@@ -1,6 +1,7 @@
 import random, time, itertools
 from model import QTrainer
 from agent import QLearningAgent
+import numpy as np
 
 """Variables to optimize in the Deep-Q-Network using Genetic Algorithm"""
 
@@ -27,9 +28,8 @@ param_ranges = {
 class GeneticAlgorithm:
 
 
-    def __init__(self, population_size, fitness, chromosome_length, param_ranges):
+    def __init__(self, population_size, chromosome_length, param_ranges):
         self.population_size = population_size #20 to 50 individuals empirical value
-        self.fit = fitness
         self.param_ranges = param_ranges #dictionary upstairs
         self.chromosome_length = chromosome_length # c_length = n_in + neurons*n_out + n_out = (11*256) + 256 + (256*3) + 3 = 3075
         self.population = self.generate_population()
@@ -109,13 +109,38 @@ class GeneticAlgorithm:
         )
 
         return fitness
+    
+    def calculate_population_fitness(self, population): #pop size usually between 20 and 50 for a generation
+        fitness_scores = []
+        for individual in population:
+
+            score = individual['score'] 
+            record = individual['record']
+            steps = individual['steps'] 
+            collisions = individual['collisions']  
+            same_positions = individual['same_positions'] 
+
+            # Calculate fitness using the function you provided
+            fitness = self.fitness_function(score, record, steps, collisions, same_positions)
+
+            # Store the fitness score for the current individual
+            fitness_scores.append(fitness)
+
+        return fitness_scores
         
     
-    def selection(self, agent): #based on fitness function
-        bestFit = None
-        #if fit == bestFit:
-            #return population[individual]
-        pass
+    def selection(self, population, fitness_scores):
+        # Normalize fitness scores to probabilities
+        total_fitness = sum(fitness_scores)
+        probabilities = [fitness / total_fitness for fitness in fitness_scores]
+
+        # Select individuals based on their fitness (roulette wheel selection)
+        selected_indices = np.random.choice(len(population), size=self.population_size, replace=True, p=probabilities)
+
+        # Create a new population based on the selected indices
+        new_population = [population[idx] for idx in selected_indices]
+
+        return new_population
     
     def crossover(self, parent1, parent2): #offspring from 2 parents
         pass
