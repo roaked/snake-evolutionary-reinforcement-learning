@@ -1,6 +1,4 @@
 import random, time, itertools
-from model import QTrainer
-from agent import QLearningAgent
 import numpy as np
 
 """Variables to optimize in the Deep-Q-Network using Genetic Algorithm"""
@@ -132,10 +130,10 @@ class GeneticAlgorithm:
     def selection(self, population, fitness_scores):
         # Normalize fitness scores to probabilities
         total_fitness = sum(fitness_scores)
-        probabilities = [fitness / total_fitness for fitness in fitness_scores]
+        probabilities = [fitness / total_fitness for fitness in fitness_scores] # List Comprehension - Probabilities
 
-        # Select individuals based on their fitness (roulette wheel selection)
-        selected_indices = np.random.choice(len(population), size=self.population_size, replace=True, p=probabilities)
+        # Select based on fitness (roulette wheel selection) // replace = True means one individual can be picked more than 1 time
+        selected_indices = np.random.choice(len(population), size = self.population_size, replace = True, p = probabilities)
 
         # Create a new population based on the selected indices
         new_population = [population[idx] for idx in selected_indices]
@@ -188,7 +186,8 @@ class GeneticAlgorithm:
 
         return best_agents
 
-ga = GeneticAlgorithm(population_size = 20, fitness = 2, chromosome_length = 3075) # pop size usually between 20 and 50
+ga = GeneticAlgorithm(population_size = 20, chromosome_length = 3075, param_ranges = param_ranges) 
 
+# pop size usually between 20 and 50
 # chromosome length = (11 * 256) + 256 + (256 * 3) + 3 = 3075 (neural network)
 
