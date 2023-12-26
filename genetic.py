@@ -139,18 +139,23 @@ class GeneticAlgorithm:
 
         return new_population
     
-    def elitist_selection(population, fitness_scores, num_elites): # Not using but could select the 'Elite' individuals with highest p
+    ##############################################################################################################################
+    """# Not using but could select the 'Elite' individuals with highest p - num_elites is the length of selecting individuals"""
+    def elitist_selection(population, fitness_scores, num_elites): 
         # Get indices of individuals sorted by fitness (descending order)
-        sorted_indices = sorted(range(len(fitness_scores)), key=lambda i: fitness_scores[i], reverse=True)
+        sorted_indices = sorted(range(len(fitness_scores)), key = lambda i: fitness_scores[i], reverse=True)
         
         # Select the top individuals as elites
         new_population = [population[idx] for idx in sorted_indices[:num_elites]]
     
-        return new_population
-    
+        return new_population # Diff. size / length
+    ##############################################################################################################################
+
+
     selected_population = selection(population = population, fitness_scores = fitness_scores) # Put at the end of code after implementation
     parent1, parent2 = random.sample(selected_population, 2) # Put at the end of code after implementation
     
+    """Single-point crossover for two parent individuals. Can explore two-point crossover, uniform crossover, elitist crossover, etc."""
     def crossover(self, parent1, parent2):
 
         assert len(parent1) == len(parent2) # Only if same len
