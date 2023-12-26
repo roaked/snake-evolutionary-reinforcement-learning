@@ -31,15 +31,27 @@ MUTATION_RATE = 0.1
 1 in every 100 genes will undergo a mutation per generation. Higher mutation rates, like 5% or 10%, 
 can introduce more exploration but might risk losing some beneficial traits learned through crossover."""
 
+CROSSOVER_RATE = 0.8
+
+"""Typical values for the crossover rate in genetic algorithms often range between 0.6 and 0.9. 
+(...)higher crossover rate, closer to 1.0, favors more exploration (diversity), 
+(...)lower crossover rate, closer to 0.6, emphasizes exploitation (convergence)"""
+
+POPULATION_SIZE = 20
+
+"""Typical empirical values range from 20 to 50 individuals in a generation"""
+
+
 class GeneticAlgorithm:
 
 
-    def __init__(self, population_size, chromosome_length, param_ranges, MUTATION_RATE):
-        self.population_size = population_size #20 to 50 individuals empirical value
+    def __init__(self, POPULATION_SIZE, chromosome_length, param_ranges, MUTATION_RATE):
+        self.population_size = POPULATION_SIZE 
         self.param_ranges = param_ranges #dictionary upstairs
         self.chromosome_length = chromosome_length # c_length = n_in + neurons*n_out + n_out = (11*256) + 256 + (256*3) + 3 = 3075
         self.population = self.generate_population()
         self.mutation_rate = MUTATION_RATE
+        self.crossover_rate = CROSSOVER_RATE
 
 
 
@@ -165,21 +177,24 @@ class GeneticAlgorithm:
     parent1, parent2 = random.sample(selected_population, 2) # Put at the end of code after implementation
     
     """Single-point crossover for two parent individuals. Can explore two-point crossover, uniform crossover, elitist crossover, etc."""
-    def crossover(self, parent1, parent2):
+    def crossover(self, parent1, parent2, crossover_rate):
 
         assert len(parent1) == len(parent2) # Only if same len
 
-        # Crossover point // Similar to Bin Packing Problem (BPP) ----> (Can check in MATLAB)
-        crossover_point = random.randint(1, len(parent1) - 1)
+        if random.random() < crossover_rate:
+            # Crossover point
+            crossover_point = random.randint(1, len(parent1) - 1)
 
-        # Create offspring by combining parent genes
-        offspring1 = parent1[:crossover_point] + parent2[crossover_point:]
-        offspring2 = parent2[:crossover_point] + parent1[crossover_point:]
+            # Create offspring by combining parent genes
+            offspring1 = parent1[:crossover_point] + parent2[crossover_point:]
+            offspring2 = parent2[:crossover_point] + parent1[crossover_point:]
 
-        return offspring1, offspring2
+            return offspring1, offspring2
+        else:
+            return parent1, parent2 # If crossover doesn't happen, return the parents
     
     
-    offspring1, offspring2 = crossover(parent1, parent2)  # Put at the end of code after implementation
+    offspring1, offspring2 = crossover(parent1, parent2, crossover_rate = CROSSOVER_RATE)  # Put at the end of code after implementation
 
 
     """According to Genetic Algorithm, after crossover (breeding), we apply mutation to the resulting offspring to introduce
@@ -203,7 +218,7 @@ class GeneticAlgorithm:
 
     ##############################################################################################################################
 
-    population = generate_population(population_size = population_size, param_ranges = param_ranges)
+    population = generate_population(population_size = POPULATION_SIZE, param_ranges = param_ranges)
     fitness_scores = calculate_population_fitness(population = population)
     selected_population = selection(population = population, fitness_scores = fitness_scores) # Put at the end of code after implementation
     parent1, parent2 = random.sample(selected_population, 2) # Put at the end of code after implementation
@@ -213,7 +228,7 @@ class GeneticAlgorithm:
 
      ##############################################################################################################################
 
-    def genetic(self, num_generations, population_size, mutation_rate):
+    def genetic(self, num_generations, population_size, mutation_rate, crossover_rate):
 
         best_agents = [] # Store best
         self.population = self.generate_population()
@@ -254,8 +269,10 @@ class GeneticAlgorithm:
 
         return best_agents
 
-ga = GeneticAlgorithm(population_size = 20, chromosome_length = 3075, param_ranges = param_ranges) 
 
 # pop size usually between 20 and 50
 # chromosome length = (11 * 256) + 256 + (256 * 3) + 3 = 3075 (neural network)
 
+if __name__ == "__main__": 
+    ga = GeneticAlgorithm(population_size = POPULATION_SIZE, chromosome_length = 3075, param_ranges = param_ranges) #Initialized  
+    GeneticAlgorithm().genetic(num_generations = 5, population_size= 20, mutation_rate = MUTATION_RATE, crossover_rate = CROSSOVER_RATE)

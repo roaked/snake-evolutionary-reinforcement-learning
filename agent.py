@@ -110,12 +110,13 @@ class QLearningAgent:
 
         return np.array(state, dtype=int)
 
+    """Store experience (state, action, reward, next_state, done) in memory // MAX_MEMORY"""
     def remember(self, state, action, reward, next_state, done):
-        # Store experience (state, action, reward, next_state, done) in memory
         self.memory.append((state, action, reward, next_state, done))
 
+
+    """Sample from memory and perform a training step using QTrainer"""
     def train_long_memory(self):
-        # Sample from memory and perform a training step using QTrainer
         if len(self.memory) > BATCH_SIZE:
             mini_sample = random.sample(self.memory, BATCH_SIZE) # list of tuples
         else:
@@ -124,8 +125,8 @@ class QLearningAgent:
         states, actions, rewards, next_states, dones = zip(*mini_sample)
         self.trainer.train_step(states, actions, rewards, next_states, dones, ReplayBuffer, BATCH_SIZE)
 
+    """Perform single training step using a single experience tuple (short-term memory)"""
     def train_short_memory(self, state, action, reward, next_state, done):
-        # Perform a single training step using a single experience tuple
         self.trainer.train_step(state, action, reward, next_state, done, ReplayBuffer, BATCH_SIZE)
 
     def get_action(self, state):
@@ -144,7 +145,7 @@ class QLearningAgent:
         return final_move
 
 
-def train_and_record(record_duration):
+def train_and_record(self, record_duration):
     plotter = TrainingPlot() # To store game scores for plotting
     plot_scores = [] # To store mean scores for plotting  
     plot_mean_scores = []  # To store mean scores for plotting 
