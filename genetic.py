@@ -66,8 +66,6 @@ class GeneticAlgorithm:
         self.mutation_rate = MUTATION_RATE
         self.crossover_rate = CROSSOVER_RATE
 
-
-
     def generate_population(self, population_size, param_ranges, chromosome_length): #Random init or heuristic init (using prior info)
         #check if working
 
