@@ -66,6 +66,7 @@ class GeneticAlgorithm:
 
 
     def generate_population(self, population_size, param_ranges): #Random init or heuristic init (using prior info)
+        #check if working
 
         population = []
         for _ in range(population_size):
@@ -74,13 +75,13 @@ class GeneticAlgorithm:
 
                 #Heuristic Initialization
                 if param == 'learning_rate':
-                    params[param] = 0.01  # Heuristic init for learning rate
+                    params[param] = 0.01  # Heuristic init for learning rate --> Check agent.py
                     
                 elif param == 'dropout_rate':
-                    params[param] = 0.3  # Heuristic init for dropout rate
+                    params[param] = 0.2  # Heuristic init for dropout rate --> Check game.py
                     
                 elif param == 'activation_function':
-                    params[param] = 'relu'  # Heuristic init for activation function
+                    params[param] = 'relu'  # Heuristic init for activation function --> Default
 
                 #Random Initialization
                 if isinstance(value_range, tuple):  # Random init for continuous parameters
@@ -180,12 +181,12 @@ class GeneticAlgorithm:
     """# Not using but could select the 'Elite' individuals with highest p - num_elites is the length of selecting individuals"""
     def elitist_selection(population, fitness_scores, num_elites): 
         # Get indices of individuals sorted by fitness (descending order)
-        sorted_indices = sorted(range(len(fitness_scores)), key = lambda i: fitness_scores[i], reverse=True)
+        elite_sorted_indices = sorted(range(len(fitness_scores)), key = lambda i: fitness_scores[i], reverse=True)
         
         # Select the top individuals as elites
-        new_population = [population[idx] for idx in sorted_indices[:num_elites]]
+        new_population = [population[idx] for idx in elite_sorted_indices[:num_elites]]
     
-        return new_population # Diff. size / length
+        return new_population, elite_sorted_indices # Diff. size / length
     ##############################################################################################################################
 
 
@@ -263,17 +264,21 @@ class GeneticAlgorithm:
             # Create offspring through crossover and mutation
             offspring = []
             for i in range(0, self.population_size, 2):
-                parent1 = selected_population[i]
-                parent2 = selected_population[i + 1]
+
+                parent1, parent2 = random.sample(selected_population, 2) # Randomized
+                parent1, parent2 = selected_population[i]. selected_population[i+1] # Consecutive pairs
                 child1, child2 = self.crossover(parent1, parent2)
-                child1 = self.mutation(child1)
-                child2 = self.mutation(child2)
+                child1 = self.mutation(child1, self.mutation_rate)
+                child2 = self.mutation(child2, self.mutation_rate)
                 offspring.extend([child1, child2])
 
             # Replace the least fit part of the population with offspring
             elite_count = int(self.population_size * 0.1)  # Keep top 10% as elite
             elite_indices = sorted(range(len(fitness_scores)), key=lambda i: fitness_scores[i], reverse=True)[:elite_count]
 
+            """elitist_population could be useful"""
+            elitist_population = self.elitist_selection(self.population, fitness_scores, num_elites = self.population_size * 0.1) 
+        
             for idx in elite_indices:
                 offspring[idx] = self.population[idx]  # Preserve elite chromosomes
 
@@ -295,4 +300,5 @@ class GeneticAlgorithm:
 
 if __name__ == "__main__": 
     ga = GeneticAlgorithm(population_size = POPULATION_SIZE, chromosome_length = 3075, param_ranges = param_ranges) #Initialized  
-    GeneticAlgorithm().genetic(num_generations = 5)
+    best_agents = GeneticAlgorithm().genetic(num_generations = 5)
+    print(best_agents)

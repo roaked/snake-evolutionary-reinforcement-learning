@@ -44,8 +44,7 @@ else:
 
 MAX_MEMORY = 100_000 # Maximum memory for the agent  
 BATCH_SIZE = 1000 # Batch size for training
-ALPHA = 0.001  # Learning rate for the model
-LEARNING_RATE_GA = (0.1, 0.9)
+ALPHA = 0.01  # Learning rate for the model
 
 class QLearningAgent:
 
