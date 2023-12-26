@@ -55,10 +55,10 @@ class QLearningAgent:
         self.gamma = 0.9 # Discount factor for future rewards
         self.memory = deque(maxlen=MAX_MEMORY) # Replay memory for storing experiences
         self.model = LinearQNet(11, 256, 3) # Neural network model (input size, hidden size, output size) ----- GA
-        self.target_model = LinearQNet(11, 256, 3)
-        self.target_model.load_state_dict(self.model.state_dict())  # Sync initial weights
         self.trainer = QTrainer(self.model, lr=ALPHA, gamma=self.gamma) # QTrainer for model training -- GA
         self.replay_buffer = ReplayBuffer(capacity=BATCH_SIZE)
+        self.target_model = LinearQNet(11, 256, 3)
+        self.target_model.load_state_dict(self.model.state_dict())  # Sync initial weights
 
 
     def get_state(self, game):
