@@ -66,13 +66,13 @@ class GeneticAlgorithm:
         return population
     
     
-    def fitness_function(self, score, record, collisions, steps, same_positions): #from current state
-        """Need to implement input for same_positions, score, record, collisions, steps"""
+    def fitness_function(self, score, record, steps, collisions, same_positions): #from current state
+        """Need to implement input for same_positions, score, record, steps"""
 
         """Metrics"""
         # record -> highest score achieved thus far -> (total_score variable in agent.py)
-        # score -> current score
-        # collisions -> number of deaths thus far
+        # score -> current score (# apples eaten)
+        # collisions -> number of deaths thus far -> should be = (game number - 1)
         # steps -> average number of steps to eat food
         
 
