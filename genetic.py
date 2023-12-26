@@ -25,6 +25,8 @@ param_ranges = {
 }
 
 class GeneticAlgorithm:
+
+    
     def __init__(self, population_size, fitness, chromosome_length, param_ranges):
         self.population_size = population_size #20 to 50 individuals empirical value
         self.fit = fitness
@@ -32,25 +34,36 @@ class GeneticAlgorithm:
         self.chromosome_length = chromosome_length # c_length = n_in + neurons*n_out + n_out = (11*256) + 256 + (256*3) + 3 = 3075
         self.population = self.generate_population()
 
-    def heuristic_initialization(self, param_ranges):
-        individual = [random.uniform(param_range[0], param_range[1]) for param_range in self.param_ranges.values()]
-        return individual
 
-    def generate_population(self, population_size, param_ranges):
+
+    def generate_population(self, population_size, param_ranges): #random init or heuristic init (using prior info)
         population = []
         for _ in range(population_size):
             params = {}
             for param, value_range in param_ranges.items():
-                if isinstance(value_range, tuple):  # Continuous parameters
+
+                #Heuristic Initialization
+                if param == 'learning_rate':
+                    params[param] = 0.01  # Heuristic init for learning rate
+                    
+                elif param == 'dropout_rate':
+                    params[param] = 0.3  # Heuristic init for dropout rate
+                    
+                elif param == 'activation_function':
+                    params[param] = 'relu'  # Heuristic init for activation function
+
+                #Random Initialization
+                if isinstance(value_range, tuple):  # Random init for continuous parameters
                     params[param] = random.uniform(value_range[0], value_range[1])
                 elif isinstance(value_range, list):  # Discrete parameters
                     params[param] = random.choice(value_range)
-                # Add conditions for handling integer or other parameter types if needed
+                elif isinstance(value_range, int):  # Integer parameters
+                    params[param] = random.randint(value_range[0], value_range[1])
+                elif isinstance(value_range, str):  # String parameters
+                    params[param] = value_range  # Set the string value directly
             population.append(params)
         return population
     
-    #def initialize_population(self):
-    #   return [[random.uniform(0, 1) for _ in range(self.chromosome_length)] for _ in range(self.population_size)]
     
     def fitness_function(self, record, deaths, avg_steps, penalties):
         # record -> highest score achieved -> (total_score variable in agent.py)
