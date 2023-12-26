@@ -1,6 +1,15 @@
 import random, time, itertools
 import numpy as np
 
+##############################################################################################################################
+
+"""To do list:
+- Fitness function optimization -- Retrieve all input variables from other functions
+- Implement GeneticAlgorithm() object in the agent.py function
+- Results and test"""
+
+##############################################################################################################################
+
 """What we want or can optimize in the Deep-Q-Network using Genetic Algorithm"""
 
 param_ranges = {
