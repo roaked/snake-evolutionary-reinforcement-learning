@@ -26,7 +26,7 @@ param_ranges = {
 
 class GeneticAlgorithm:
 
-    
+
     def __init__(self, population_size, fitness, chromosome_length, param_ranges):
         self.population_size = population_size #20 to 50 individuals empirical value
         self.fit = fitness
@@ -36,7 +36,8 @@ class GeneticAlgorithm:
 
 
 
-    def generate_population(self, population_size, param_ranges): #random init or heuristic init (using prior info)
+    def generate_population(self, population_size, param_ranges): #Random init or heuristic init (using prior info)
+
         population = []
         for _ in range(population_size):
             params = {}
@@ -65,12 +66,49 @@ class GeneticAlgorithm:
         return population
     
     
-    def fitness_function(self, record, deaths, avg_steps, penalties):
-        # record -> highest score achieved -> (total_score variable in agent.py)
-        # death -> number of deaths
-        # avg steps -> average number of steps to eat food
-        # penalties (flexible) -> number of times it did 200 steps without eating any food
-        fitness = record * 500 - deaths * 150 - avg_steps * 100 - penalties * 100
+    def fitness_function(self, score, record, collisions, steps, same_positions): #from current state
+        """Need to implement input for same_positions, score, record, collisions, steps"""
+
+        """Metrics"""
+        # record -> highest score achieved thus far -> (total_score variable in agent.py)
+        # score -> current score
+        # collisions -> number of deaths thus far
+        # steps -> average number of steps to eat food
+        
+
+        """Weights"""
+        weight_score = 0.6
+        weight_collisions, MAX_COLLISIONS = 0.2, 200 # Max collisions
+        weight_steps, MAX_POSSIBLE_STEPS = 0.2, 200 # Avg steps to eat food
+
+         
+        """Normalize metrics"""
+        normalized_score = score / record if record != 0 else 0
+        normalized_collisions = 1 - (collisions / MAX_COLLISIONS) #Penalizes alot of deaths/collisions
+        normalized_steps = 1 - (steps / MAX_POSSIBLE_STEPS)  #Penalizes excessive steps to incentivize efficiency
+
+        # Penalize collisions (20%)
+        penalty_collisions = 0.2 if normalized_collisions > 0.5 else 0  # Penalize frequent collisions
+
+        # Penalty for 100 steps without score increase (10%)
+        penalty_steps = 0.10 if normalized_steps < 0.5 else 0  
+
+        # Penalty for revisiting same positions (15%)
+        penalty_same_positions = 0.15 if same_positions > 0 else 0 
+
+        # Efficiency decay (5%)
+        efficiency_decay = max(0, (steps - score) / MAX_POSSIBLE_STEPS)  # Measure deviation from optimal steps for score
+        penalty_efficiency_decay = 0.05 * efficiency_decay  # Penalize for efficiency decay
+
+        fitness = (
+            (normalized_score ** weight_score) *
+            (normalized_steps ** weight_steps) *
+            (normalized_collisions ** weight_collisions) -
+            penalty_steps - penalty_collisions  -
+            penalty_same_positions - penalty_efficiency_decay
+        )
+
+        return fitness
         
     
     def selection(self, agent): #based on fitness function
