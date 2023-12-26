@@ -131,28 +131,34 @@ class GeneticAlgorithm:
     
     def calculate_population_fitness(self, population): #pop size usually between 20 and 50 for a generation
         fitness_scores = []
-        for individual in population:
+        for chromosome in population:
 
-            score = individual['score'] 
-            record = individual['record']
-            steps = individual['steps'] 
-            collisions = individual['collisions']  
-            same_positions = individual['same_positions'] 
+            score = chromosome['score'] 
+            record = chromosome['record']
+            steps = chromosome['steps'] 
+            collisions = chromosome['collisions']  
+            same_positions = chromosome['same_positions'] 
 
             # Calculate fitness using the function you provided
             fitness = self.fitness_function(score, record, steps, collisions, same_positions)
 
-            # Store the fitness score for the current individual
+            # Store the fitness score for the current chromosome
             fitness_scores.append(fitness)
 
         return fitness_scores
+    
+    ##############################################################################################################################
+    
+    fitness_scores = calculate_population_fitness(population)
+    
+    ##############################################################################################################################
     
     def selection(self, population, fitness_scores):
         # Normalize fitness scores to probabilities
         total_fitness = sum(fitness_scores)
         probabilities = [fitness / total_fitness for fitness in fitness_scores] # List Comprehension - Probabilities Array
 
-        # Select based on fitness (roulette wheel selection) // replace = True means one individual can be picked more than 1 time
+        # Select based on fitness (roulette wheel selection) // replace = True means one chromosome can be picked more than 1 time
         selected_indices = np.random.choice(len(population), size = self.population_size, replace = True, p = probabilities)
 
         # Create a new population based on the selected indices
@@ -217,7 +223,8 @@ class GeneticAlgorithm:
 
 
     ##############################################################################################################################
-
+    """My notes"""
+    
     population = generate_population(population_size = POPULATION_SIZE, param_ranges = param_ranges)
     fitness_scores = calculate_population_fitness(population = population)
     selected_population = selection(population = population, fitness_scores = fitness_scores) # Put at the end of code after implementation
@@ -228,14 +235,14 @@ class GeneticAlgorithm:
 
      ##############################################################################################################################
 
-    def genetic(self, num_generations, population_size, mutation_rate, crossover_rate):
+    def genetic(self, num_generations):
 
         best_agents = [] # Store best
-        self.population = self.generate_population()
+        population = self.generate_population(self.population_size, self.param_ranges)
 
         for generation in range(num_generations):
             # Evaluate fitness for each chromosome in the population
-            fitness_scores = [self.fitness_function(chromosome) for chromosome in self.population]
+            fitness_scores = [self.fitness_function(chromosome) for chromosome in population]
 
             # Select high-performing chromosomes (using tournament selection)
             selected_population = self.selection(fitness_scores)
@@ -275,4 +282,4 @@ class GeneticAlgorithm:
 
 if __name__ == "__main__": 
     ga = GeneticAlgorithm(population_size = POPULATION_SIZE, chromosome_length = 3075, param_ranges = param_ranges) #Initialized  
-    GeneticAlgorithm().genetic(num_generations = 5, population_size= 20, mutation_rate = MUTATION_RATE, crossover_rate = CROSSOVER_RATE)
+    GeneticAlgorithm().genetic(num_generations = 5)
