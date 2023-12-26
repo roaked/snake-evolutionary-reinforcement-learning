@@ -3,13 +3,20 @@ from model import QTrainer
 from agent import QLearningAgent
 
 
-####Implementation based on Bin Packing Genetic Algorithm -
+####Implementation based on Bin Packing Genetic Algorithm 
+
+###IMMUTABLE VARIABLES
+
+GENERATIONS = 1000
+LEARNING_RATE_GA = (0.1, 0.9)
 
 class GeneticAlgorithm:
-    def __init__(self, population_size, param_ranges, fitness):
+    def __init__(self, population_size, fitness, chromosome_length):
         self.population_size = population_size
         self.fit = fitness
         self.param_ranges = param_ranges
+        self.chromosome_length = chromosome_length
+        self.population = self.generate_population()
 
     def generate_population(self):
         # Generate initial population of parameters
@@ -20,7 +27,10 @@ class GeneticAlgorithm:
             population.append(params)
         return population
     
-    def cost_function(self, record, deaths, avg_steps, penalties):
+    #def initialize_population(self):
+    #   return [[random.uniform(0, 1) for _ in range(self.chromosome_length)] for _ in range(self.population_size)]
+    
+    def fitness_function(self, record, deaths, avg_steps, penalties):
         # record -> highest score achieved -> (total_score variable in agent.py)
         # death -> number of deaths
         # avg steps -> average number of steps to eat food
@@ -28,57 +38,56 @@ class GeneticAlgorithm:
         fitness = record * 500 - deaths * 150 - avg_steps * 100 - penalties * 100
         
     
-    # def select_top_agents(agent):
-    #         if fit == bestFit:
-    #             return population[individual]
-    #  
-    #     return 1
+    def selection(self, agent): #based on fitness function
+        if fit == bestFit:
+            return population[individual]
+        pass
     
-    def crossover_and_mutation(agent):
+    def crossover(self, parent1, parent2): #offspring from 2 parents
+        pass
 
-        return 1
+    def mutation(self, chromosome): #randomize changes
+        pass
     
-    def get_best_agent_params(population):
-        return 1
-    
-    def evolve(self):
-        population = self.generate_population()
+    def evolve(self, generations):
+        best_agents = [] # store best
+        self.population = self.initialize_population()
 
-        for generation in range(num_generations):
-            # Train Q-learning agents with parameters from the population
-            agents = [QLearningAgent(params) for params in population]
-            for agent in agents:
-                agent.train()
-                agent.evaluate()  # Evaluate the agent's performance
+        for generation in range(generations):
+            # Evaluate fitness for each chromosome in the population
+            fitness_scores = [self.fitness_function(chromosome) for chromosome in self.population]
 
-            # Select top-performing agents for genetic operations
-            top_agents = GeneticAlgorithm.select_top_agents(agents)
+            # Select high-performing chromosomes (using tournament selection)
+            selected_chromosomes = self.selection(fitness_scores)
 
-            # Apply genetic operations (crossover and mutation)
-            new_population = GeneticAlgorithm.crossover_and_mutation(top_agents)
+            # Create offspring through crossover and mutation
+            offspring = []
+            for i in range(0, self.population_size, 2):
+                parent1 = selected_chromosomes[i]
+                parent2 = selected_chromosomes[i + 1]
+                child1, child2 = self.crossover(parent1, parent2)
+                child1 = self.mutation(child1)
+                child2 = self.mutation(child2)
+                offspring.extend([child1, child2])
 
-            population = new_population
+            # Replace the least fit part of the population with offspring
+            elite_count = int(self.population_size * 0.1)  # Keep top 10% as elite
+            elite_indices = sorted(range(len(fitness_scores)), key=lambda i: fitness_scores[i], reverse=True)[:elite_count]
 
-        # Extract the best-performing agent from the final population
-        best_agent_params = GeneticAlgorithm.get_best_agent_params(population)
-        best_agent = QLearningAgent(best_agent_params)
-        return best_agent
+            for idx in elite_indices:
+                offspring[idx] = self.population[idx]  # Preserve elite chromosomes
 
-LEARNING_RATE_GA = (0.1, 0.9)
+            # Fill the rest with offspring (biased towards better fitness)
+            self.population = random.sample(offspring, self.population_size - elite_count)
 
-# Define parameter ranges for genetic algorithm
-param_ranges = {
-    "learning_rate": LEARNING_RATE_GA,
-    "epsilon": (0.1, 0.9),
-    # other Q-learning hyperparameters here
-}
+            # Store information on the best agent of this generation
+            best_chromosome = max(self.population, key=self.fitness_function)
+            best_fitness = self.fitness_function(best_chromosome)
+            best_agents.append((best_chromosome, best_fitness))
 
-ga = GeneticAlgorithm(population_size=10, param_ranges=param_ranges, fitness=2) # pop size = 10
+            print(f"Generation {generation}: Best Chromosome - {best_chromosome}, Fitness - {best_fitness}")
 
-# # Evolve and find the best Q-learning agent parameters
-# best_agent = ga.evolve()
+        return best_agents
 
-# # Train the best Q-learning agent with the optimal parameters
-# best_agent.train()
-# #train()
-# GeneticAlgorithm(population_size=50, param_ranges=12)
+ga = GeneticAlgorithm(population_size=10, fitness=2, chromosome_length=10) # pop size = 10
+
