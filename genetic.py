@@ -1,29 +1,50 @@
-import random
+import random, time, itertools
 from model import QTrainer
 from agent import QLearningAgent
 
+"""Variables to optimize in the Deep-Q-Network using Genetic Algorithm"""
 
-####Implementation based on Bin Packing Genetic Algorithm 
+param_ranges = {
+    # Continuous parameters
+    'learning_rate': (0.001, 0.1), # Alpha / Higher values allow faster learning, while lower values ensure more stability
+    'discount_factor': (0.9, 0.999), #Gamme / Closer to 1 indicate future rewards are highly important, emphasizing long-term rewards
+    'dropout_rate': (0.1, 0.5), # Higher drops out a more neurons -> prevent overfit in complex models or datasets with limited samples
+    'exploration_rate': (0.1, 0.5), #Epsilon /Higher more exploration -> Possibly better actions /Lower -> More stability using learned policy
+    
+    # Discrete parameters
+    'batch_size': [10, 100, 250, 500, 1000, 2000, 5000], # Number of experiences sampled from the replay buffer for training.
+    'activation_function': ['relu', 'sigmoid', 'tanh'],
+    'optimizer': ['adam', 'sgd', 'rmsprop'], 
+    
+    # Integer parameters (num_inputs, num_outputs of NN)
+    'num_hidden_layers': [1, 2, 3, 4, 5],
+    'neurons_per_layer': [32, 64, 128, 256, 512, 1024]
 
-###IMMUTABLE VARIABLES
+    # Other parameters
+    #'MAX_MEMORY' -> capacity of replay memory
+}
 
 GENERATIONS = 1000
 LEARNING_RATE_GA = (0.1, 0.9)
 
 class GeneticAlgorithm:
-    def __init__(self, population_size, fitness, chromosome_length):
+    def __init__(self, population_size, fitness, chromosome_length, param_ranges = param_ranges):
         self.population_size = population_size
         self.fit = fitness
         self.chromosome_length = chromosome_length
         self.population = self.generate_population()
 
+    def heuristic_initialization(self, param_ranges):
+        individual = [random.uniform(param_range[0], param_range[1]) for param_range in self.param_ranges.values()]
+        return individual
+
     def generate_population(self):
-        # Generate initial population of parameters
         population = []
+        # Heuristic initialization
         for _ in range(self.population_size):
-            params = {param: random.uniform(param_range[0], param_range[1])
-                      for param, param_range in self.param_ranges.items()}
-            population.append(params)
+            # Create an individual with heuristic initialization
+            individual = self.heuristic_initialization()
+            population.append(individual)
         return population
     
     #def initialize_population(self):
@@ -89,5 +110,7 @@ class GeneticAlgorithm:
 
         return best_agents
 
-ga = GeneticAlgorithm(population_size=10, fitness=2, chromosome_length=10) # pop size = 10
+ga = GeneticAlgorithm(population_size = 20, fitness = 2, chromosome_length = 3075) # pop size usually between 20 and 50
+
+# chromosome length = (11 * 256) + 256 + (256 * 3) + 3 = 3075 (neural network)
 
