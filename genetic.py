@@ -99,14 +99,14 @@ class GeneticAlgorithm:
     def fitness_function(self, score, record, steps, collisions, same_positions_counter): #from current state
         """Metrics and weights"""
         weight_score = 0.75
-        weight_steps, MAX_POSSIBLE_STEPS = 0.25, 200
+        weight_steps, MAX_POSSIBLE_STEPS = 0.25, 300
 
         """Normalize metrics"""
         normalized_score = score / record if record != 0 else 0
         normalized_steps = 1 - (steps / MAX_POSSIBLE_STEPS) if MAX_POSSIBLE_STEPS != 0 else 0
 
         # Penalty for revisiting same positions > 30
-        penalty_same_positions = 0.05 if same_positions_counter > 30 else 0
+        penalty_same_positions = 0.05 if same_positions_counter > 150 else 0
 
         # Efficiency decay (5%)
         efficiency_decay = max(0, (steps - score) / MAX_POSSIBLE_STEPS)
@@ -159,7 +159,7 @@ class GeneticAlgorithm:
         print('\n')
 
         total_fitness = sum(fitness_scores)
-        
+
         if total_fitness == 0:
             probabilities = [1 / len(fitness_scores)] * len(fitness_scores)
         else:
