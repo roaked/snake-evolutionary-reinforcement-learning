@@ -89,9 +89,9 @@ class QLearningAgent:
         activation_function = parameters.get('activation_function', 'relu')
         self.model = LinearQNet(input_size, hidden_size, output_size, dropout_rate, num_hidden_layers, activation_function)
         
-
+        optimizer = parameters.get('optimizer','adam')
         self.lr = parameters.get('learning_rate', alpha)
-        self.trainer = QTrainer(self.model, lr = self.lr, gamma = self.gamma) 
+        self.trainer = QTrainer(self.model, lr = self.lr, gamma = self.gamma, optimizer_name = optimizer) 
         self.batch_size = parameters.get('batch_size', batch_size)
         self.replay_buffer = ReplayBuffer(capacity = self.batch_size)
         self.target_model = LinearQNet(input_size, hidden_size, output_size, dropout_rate, num_hidden_layers, activation_function)
