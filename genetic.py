@@ -75,6 +75,7 @@ class GeneticAlgorithm:
             'collisions': self.collisions,
             'same_positions': self.same_positions
         }
+    
 
     def generate_population(self, population_size, param_ranges, chromosome_length): #Random init or heuristic init (using prior info)
         #check if working
@@ -110,10 +111,10 @@ class GeneticAlgorithm:
         """Need to implement input for same_positions, score, record, steps"""
 
         """Metrics"""
-        # record -> highest score achieved thus far -> (total_score variable in agent.py)
+        # record -> highest score achieved thus far -> (score variable in agent.py)
         # score -> current score (# apples eaten)
         # collisions -> number of deaths thus far -> should be = (game number - 1)
-        # steps -> average number of steps to eat food
+        # steps -> number of steps to eat / reset when apple is eaten or dead
         
 
         """Weights"""
@@ -123,7 +124,7 @@ class GeneticAlgorithm:
 
          
         """Normalize metrics"""
-        normalized_score = score / record if record != 0 else 0
+        normalized_score = score / record #if record != 0 else 0
         normalized_collisions = 1 - (collisions / MAX_COLLISIONS) #Penalizes alot of deaths/collisions
         normalized_steps = 1 - (steps / MAX_POSSIBLE_STEPS)  #Penalizes excessive steps to incentivize efficiency
 
@@ -150,20 +151,15 @@ class GeneticAlgorithm:
 
         return fitness
     
-    def calculate_population_fitness(self, population): #pop size usually between 20 and 50 for a generation
+    def calculate_population_fitness(self, score, record, collisions, steps, same_positions, game_metrics_list):
         fitness_scores = []
-        for chromosome in population:
 
-            score = chromosome['score'] 
-            record = chromosome['record']
-            steps = chromosome['steps'] 
-            collisions = chromosome['collisions']  
-            same_positions = chromosome['same_positions'] 
+        for metric in game_metrics_list: #last 5 games while length > 5?
+            
+            # Calculate fitness based on game performance
+            fitness = self.calculate_fitness(score, steps, collisions)
 
-            # Calculate fitness using the function you provided
-            fitness = self.fitness_function(score, record, steps, collisions, same_positions)
-
-            # Store the fitness score for the current chromosome
+            # Store fitness score for this set of parameters
             fitness_scores.append(fitness)
 
         return fitness_scores
@@ -256,17 +252,16 @@ class GeneticAlgorithm:
 
      ##############################################################################################################################
 
-    def genetic(self, num_generations):
+    def genetic(self, num_generations, score, record, steps, collisions, same_positions, game_metrics_list):
 
         best_parameters = None 
         best_fitness = float('-inf')  
         best_agents = [] # Store best
-        #population = self.generate_population(self.population_size, self.param_ranges) #No need, already initialized in __init__
 
         for generation in range(num_generations):
             # Evaluate fitness for each chromosome in the population
             #fitness_scores = [self.fitness_function(chromosome) for chromosome in self.population]
-            fitness_scores = self.calculate_population_fitness(self.population) 
+            fitness_scores = self.calculate_population_fitness(self.population, score, record, steps, collisions, same_positions, game_metrics_list) 
             """Compare both"""
 
             # Select high-performing chromosomes (using tournament selection)
@@ -317,3 +312,33 @@ class GeneticAlgorithm:
 #                           mutation_rate = MUTATION_RATE) #Initialized  
 #     best_agents = GeneticAlgorithm().genetic(num_generations = NUM_GENERATIONS)
 #     print(best_agents)
+    
+
+#######################################################################################################################################
+    
+
+class GeneticOldFunctions():
+        
+        def calculate_population_fitness(self, population, score, record, steps, collisions, same_positions): 
+            fitness_scores = []  #pop size usually between 20 and 50 for a generation
+
+            default_values = {'score': 0, 'record': 0, 'steps': 0, 'collisions': 0, 'same_positions': 0}
+
+            # Initializing the population list / Randomize
+            population = [default_values.copy() for _ in range(POPULATION_SIZE)]
+
+            for chromosome in population:
+
+                score = chromosome['score'] 
+                record = chromosome['record']
+                steps = chromosome['steps'] 
+                collisions = chromosome['collisions']  
+                same_positions = chromosome['same_positions'] 
+
+                # Calculate fitness using the function you provided
+                fitness = self.fitness_function(score, record, steps, collisions, same_positions)
+
+                # Store the fitness score for the current chromosome
+                fitness_scores.append(fitness)
+
+            return fitness_scores
