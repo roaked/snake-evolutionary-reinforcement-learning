@@ -172,8 +172,17 @@ class GeneticAlgorithm:
         total_fitness = sum(fitness_scores)
         probabilities = [fitness / total_fitness for fitness in fitness_scores] # List Comprehension - Probabilities Array
 
+        # Ensure probabilities array size matches population size
+        while len(probabilities) < len(population):
+            probabilities.append(0.0)
+
         # Select based on fitness (roulette wheel selection) // replace = True means one chromosome can be picked more than 1 time
-        selected_indices = np.random.choice(len(population), size = self.population_size, replace = True, p = probabilities)
+        selected_indices = np.random.choice(
+            len(population), 
+            size=self.population_size, 
+            replace=True, 
+            p=probabilities / np.sum(probabilities)  # Normalize probabilities to sum up to 1
+        )
 
         # Create a new population based on the selected indices
         new_population = [population[idx] for idx in selected_indices] # List Comprehension - New population Array
