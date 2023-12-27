@@ -152,10 +152,15 @@ class GeneticAlgorithm:
         return fitness
     
     def calculate_population_fitness(self, population, game_metrics_list):
+
+        """We should add fitness scores for all the population...."""
+        
         fitness_scores = []
 
-        # Consider metrics for the last 5 games
-        last_5_game_metrics = game_metrics_list[-5:]
+        if len(game_metrics_list) >= 5:
+            last_5_game_metrics = game_metrics_list[-5:] # Ensure there are at least 5 game metrics
+        else:
+            last_5_game_metrics = game_metrics_list # Less than 5 games, consider all available
 
         for individual_metrics in last_5_game_metrics:
             # Extract individual game metrics from the dictionary
@@ -166,8 +171,6 @@ class GeneticAlgorithm:
             same_positions_counter = individual_metrics['same_positions']
 
             # Calculate fitness based on game performance
-            fitness = self.fitness_function(score, record, steps, collisions, same_positions_counter)
-
             fitness = self.fitness_function(score, record, steps, collisions, same_positions_counter)
             fitness_scores.append(fitness)
 
