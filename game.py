@@ -57,6 +57,7 @@ class SnakeGameAI:
         pygame.display.set_caption('Snake')
         self.clock = pygame.time.Clock()
         self._init_game()
+        self.deaths = 0
 
 
     def _init_game(self):
@@ -76,9 +77,8 @@ class SnakeGameAI:
         self.food = None
         self.frame_iteration = 0
         self._place_food()
-        self.deaths = 0 # need to update this later
         self.steps = 0 # update this in play step
-
+        #self.deaths = 0
 
     def _place_food(self):
         snake_positions = {point for point in self.snake}  # Set of snake positions

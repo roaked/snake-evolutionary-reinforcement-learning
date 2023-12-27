@@ -271,10 +271,25 @@ def train():
             game_metrics_list.append(game_metrics)
 
             # Pass game metrics to the genetic algorithm after each game
-            _, best_parameters, _ = genetic.genetic(NUM_GENERATIONS, score = score, record = record, steps = steps, 
+            _, best_params, _ = genetic.genetic(NUM_GENERATIONS, score = score, record = record, steps = steps, 
                                                     collisions = collisions, same_positions_counter = same_positions_counter,  
                                                     game_metrics_list = game_metrics_list)
             
+            keys = [
+                    'learning_rate',
+                    'discount_factor',
+                    'dropout_rate',
+                    'exploration_rate',
+                    'batch_size',
+                    'activation_function',
+                    'optimizer',
+                    'num_hidden_layers',
+                    'neurons_per_layer'
+                ]
+            
+            # Pair keys with corresponding values from best_params
+            best_parameters = {key: value for key, value in zip(keys, best_params)}
+                            
             # Reinitialize the agent with the best parameters for the next game
             agent = QLearningAgent(parameters = best_parameters)
             same_positions_counter = 0
