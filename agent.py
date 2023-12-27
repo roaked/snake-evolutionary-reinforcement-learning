@@ -232,7 +232,7 @@ def train_and_record(record_duration):
             plotter.update(plot_scores, plot_mean_scores)
 
 
-            best_agent, best_parameters, best_fitness = genetic(genetic.num_generations)
+            _, best_parameters, _ = genetic.genetic(NUM_GENERATIONS)
 
             agent = QLearningAgent(parameters = best_parameters)
 
