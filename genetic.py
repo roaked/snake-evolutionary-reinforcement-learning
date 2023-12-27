@@ -67,6 +67,15 @@ class GeneticAlgorithm:
         self.game = game
         self.neural_network_architecture = neural_network_architecture
 
+    def get_chromosome(self):
+        return {
+            'score': self.score,
+            'record': self.record,
+            'steps': self.steps,
+            'collisions': self.collisions,
+            'same_positions': self.same_positions
+        }
+
     def generate_population(self, population_size, param_ranges, chromosome_length): #Random init or heuristic init (using prior info)
         #check if working
 
