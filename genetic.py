@@ -108,15 +108,12 @@ class GeneticAlgorithm:
     
     
     def fitness_function(self, score, record, steps, collisions, same_positions_counter): #from current state
-        """Need to implement input for same_positions, score, record, steps"""
-
         """Metrics"""
         # record -> highest score achieved thus far -> (score variable in agent.py)
         # score -> current score (# apples eaten)
         # collisions -> number of deaths thus far -> should be = (game number - 1)
         # steps -> number of steps to eat / reset when apple is eaten or dead
         
-
         """Weights"""
         weight_score = 0.6
         weight_collisions, MAX_COLLISIONS = 0.2, 200 # Max collisions
@@ -124,9 +121,9 @@ class GeneticAlgorithm:
 
          
         """Normalize metrics"""
-        normalized_score = score / record #if record != 0 else 0
-        normalized_collisions = 1 - (collisions / MAX_COLLISIONS) #Penalizes alot of deaths/collisions
-        normalized_steps = 1 - (steps / MAX_POSSIBLE_STEPS)  #Penalizes excessive steps to incentivize efficiency
+        normalized_score = score / record if record != 0 else 0
+        normalized_collisions = 1 - (collisions / MAX_COLLISIONS) if MAX_COLLISIONS != 0 else 0 #Penalizes alot of deaths/collisions
+        normalized_steps = 1 - (steps / MAX_POSSIBLE_STEPS) if MAX_POSSIBLE_STEPS != 0 else 0 #Penalizes excessive steps to incentivize efficiency
 
         # Penalize collisions (20%)
         penalty_collisions = 0.2 if normalized_collisions > 0.5 else 0  # Penalize frequent collisions
@@ -154,7 +151,7 @@ class GeneticAlgorithm:
     def calculate_population_fitness(self, population, game_metrics_list):
 
         """We should add fitness scores for all the population...."""
-        
+
         fitness_scores = []
 
         if len(game_metrics_list) >= 5:
@@ -294,8 +291,8 @@ class GeneticAlgorithm:
             elite_count = int(self.population_size * 0.1)  # Keep top 10% as elite
             elite_indices = sorted(range(len(fitness_scores)), key=lambda i: fitness_scores[i], reverse=True)[:elite_count]
 
-            """elitist_population could be useful"""
-            elitist_population = self.elitist_selection(self.population, fitness_scores, num_elites = self.population_size * 0.1) 
+            """elitist_population could be useful
+            #elitist_population = self.elitist_selection(self.population, fitness_scores, num_elites = self.population_size * 0.1) """
         
             for idx in elite_indices:
                 offspring[idx] = self.population[idx]  # Preserve elite chromosomes
