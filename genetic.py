@@ -78,33 +78,22 @@ class GeneticAlgorithm:
     
 
     def generate_population(self, population_size, param_ranges, chromosome_length): #Random init or heuristic init (using prior info)
-        #check if working
-
         population = []
+        chromosome_length = len(param_ranges)
         for _ in range(population_size):
             params = {}
-            for _ in range(chromosome_length):
-                for param, value_range in param_ranges.items():
+            for param, value_range in param_ranges.items():
+                if isinstance(value_range, tuple):  # Random init for continuous parameters
+                    params[param] = random.uniform(value_range[0], value_range[1])
+                elif isinstance(value_range, list):  # Discrete parameters
+                    params[param] = random.choice(value_range)
+                elif isinstance(value_range, int):  # Integer parameters
+                    params[param] = random.randint(0, value_range)
+                elif isinstance(value_range, str):  # String parameters
+                    params[param] = value_range  # Set the string value directly
+            population.append(params)
 
-                    # #Heuristic Initialization
-                    # if param == 'learning_rate':
-                    #     params[param] = 0.01  # Heuristic init for learning rate --> Check agent.py  
-                    # elif param == 'dropout_rate':
-                    #     params[param] = 0.2  # Heuristic init for dropout rate --> Check game.py    
-                    # elif param == 'activation_function':
-                    #     params[param] = 'relu'  # Heuristic init for activation function --> Default
-
-                    #Random Initialization
-                    if isinstance(value_range, tuple):  # Random init for continuous parameters
-                        params[param] = random.uniform(value_range[0], value_range[1])
-                    elif isinstance(value_range, list):  # Discrete parameters
-                        params[param] = random.choice(value_range)
-                    elif isinstance(value_range, int):  # Integer parameters
-                        params[param] = random.randint(value_range[0], value_range[1])
-                    elif isinstance(value_range, str):  # String parameters
-                        params[param] = value_range  # Set the string value directly
-                population.append(params)
-            return population
+        return population
     
     
     def fitness_function(self, score, record, steps, collisions, same_positions_counter): #from current state
@@ -170,7 +159,11 @@ class GeneticAlgorithm:
         print('\n')
 
         total_fitness = sum(fitness_scores)
-        probabilities = [fitness / total_fitness for fitness in fitness_scores] # List Comprehension - Probabilities Array
+        
+        if total_fitness == 0:
+            probabilities = [1 / len(fitness_scores)] * len(fitness_scores)
+        else:
+            probabilities = [fitness / total_fitness for fitness in fitness_scores]
 
         # Ensure probabilities array size matches population size
         while len(probabilities) < len(population):
@@ -208,6 +201,11 @@ class GeneticAlgorithm:
     """Single-point crossover for two parent individuals. Can explore two-point crossover, uniform crossover, elitist crossover, etc."""
     def crossover(self, parent1, parent2, crossover_rate):
 
+        if isinstance(parent1, dict) and isinstance(parent2, dict):
+            # Convert dictionary values to lists
+            parent1 = list(parent1.values())
+            parent2 = list(parent2.values())
+
         assert len(parent1) == len(parent2) # Only if same len
 
         if random.random() < crossover_rate:
@@ -228,13 +226,16 @@ class GeneticAlgorithm:
 
     """According to Genetic Algorithm, after crossover (breeding), we apply mutation to the resulting offspring to introduce
     small changes to their genetic material depending on the mutation rate, this helps explores new areas of solution space"""
-    def mutation(individual, mutation_rate):
+    def mutation(self, individual, mutation_rate):
 
         mutated_individual = []
         for gene in individual:
             if random.random() < mutation_rate:
-                # Flip the bit
-                mutated_gene = 1 - gene
+                try: # Assuming 'gene' is a string that needs to be converted to a numerical type
+                    gene = int(gene)  # Convert 'gene' to an integer
+                    mutated_gene = 1 - gene
+                except ValueError:
+                    print("Conversion to integer failed. 'gene' might not be a numeric value.")
             else:
                 mutated_gene = gene
             mutated_individual.append(mutated_gene)
@@ -275,30 +276,54 @@ class GeneticAlgorithm:
 
             # Create offspring through crossover and mutation
             offspring = []
-            for i in range(0, self.population_size, 2):
-
-                parent1, parent2 = random.sample(selected_population, 2) # Randomized
-                parent1, parent2 = selected_population[i]. selected_population[i+1] # Consecutive pairs
-                child1, child2 = self.crossover(parent1, parent2)
+            for i in range(0, len(selected_population)-1, 2):
+                parent1, parent2 = selected_population[i], selected_population[i+1] # Consecutive pairs
+                child1, child2 = self.crossover(parent1, parent2, CROSSOVER_RATE)
                 child1 = self.mutation(child1, self.mutation_rate)
                 child2 = self.mutation(child2, self.mutation_rate)
                 offspring.extend([child1, child2])
 
+
+
             # Replace the least fit part of the population with offspring
             elite_count = int(self.population_size * 0.1)  # Keep top 10% as elite
             elite_indices = sorted(range(len(fitness_scores)), key=lambda i: fitness_scores[i], reverse=True)[:elite_count]
-
-            """elitist_population could be useful
-            #elitist_population = self.elitist_selection(self.population, fitness_scores, num_elites = self.population_size * 0.1) """
         
             for idx in elite_indices:
                 offspring[idx] = self.population[idx]  # Preserve elite chromosomes
+
+            for item in offspring:
+                if isinstance(item, dict):
+                    print("Dictionary:")
+                    for key, value in item.items():
+                        print(f"{key}: {value}")
+                elif isinstance(item, list):
+                    print("List:")
+                    for value in item:
+                        print(value)
+                else:
+                    print("Unknown type")
+                print()
 
             # Fill the rest with offspring (biased towards better fitness)
             self.population = random.sample(offspring, self.population_size - elite_count)
 
             # Store information on the best agent of this generation
-            current_best_chromosome = max(self.population, key=self.fitness_function)
+
+            for game_metrics in game_metrics_list:
+                score = game_metrics['score']
+                record = game_metrics['record']
+                steps = game_metrics['steps']
+                collisions = game_metrics['collisions']
+                same_positions = game_metrics['same_positions']
+                
+                # Use these values as needed within your code
+                # For instance, print them
+                print(f"Score: {score}, Record: {record}, Steps: {steps}, Collisions: {collisions}, Same Positions: {same_positions}")
+
+            current_best_chromosome = max(self.population, key=lambda game_metrics_list: self.fitness_function
+                                          (game_metrics_list['score'], game_metrics_list['record'], game_metrics_list['steps'],
+                                            game_metrics_list['collisions'], game_metrics_list['same_positions_counter']))
             current_best_fitness = self.fitness_function(current_best_chromosome)
             best_agents.append((current_best_chromosome, current_best_fitness))
 

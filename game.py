@@ -115,7 +115,6 @@ class SnakeGameAI:
             game_over = True
             reward = -10
             self.deaths += 1 # dying
-            self.steps = 0
             return reward, game_over, self.score, self.deaths, self.steps
         
         # Check if the snake has eaten the food

@@ -237,17 +237,9 @@ def train():
         # # Check if the snake's head position has been visited before
         # same_positions = len(visited_positions) != len(set(visited_positions))
 
-        # Store game metrics in a dictionary
-        game_metrics = {
-            'score': score,
-            'record': record,
-            'steps': steps,
-            'collisions': collisions,
-            'same_positions': same_positions_counter
-        }
-        game_metrics_list.append(game_metrics)
 
         if done: # He is dead
+
             # Initialize the game for the next iteration
             game._init_game()
             agent.n_games += 1
@@ -260,13 +252,23 @@ def train():
 
             print('Game', agent.n_games, 'Score', score, 'Record:', record)
 
-
             # Update plot data for visualization
             plot_scores.append(score)
             total_score += score
             mean_score = total_score / agent.n_games
             plot_mean_scores.append(mean_score)
             plotter.update(plot_scores, plot_mean_scores)
+
+            # Store game metrics in a dictionary
+            game_metrics = {
+                'score': score,
+                'record': record,
+                'steps': steps,
+                'collisions': collisions,
+                'same_positions': same_positions_counter
+            }
+
+            game_metrics_list.append(game_metrics)
 
             # Pass game metrics to the genetic algorithm after each game
             _, best_parameters, _ = genetic.genetic(NUM_GENERATIONS, score = score, record = record, steps = steps, 
@@ -276,6 +278,7 @@ def train():
             # Reinitialize the agent with the best parameters for the next game
             agent = QLearningAgent(parameters = best_parameters)
             same_positions_counter = 0
+            steps = 0
 
 if __name__ == "__main__": 
     random_params = create_random_parameters(param_ranges)
