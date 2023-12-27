@@ -16,7 +16,7 @@ To do list:
 param_ranges = {
     # Continuous parameters
     'learning_rate': (0.001, 0.1), # Alpha / Higher values allow faster learning, while lower values ensure more stability
-    'discount_factor': (0.9, 0.999), #Gamme / Closer to 1 indicate future rewards are highly important, emphasizing long-term rewards
+    'discount_factor': (0.9, 0.999), #Gamma / Closer to 1 indicate future rewards are highly important, emphasizing long-term rewards
     'dropout_rate': (0.1, 0.5), # Higher drops out a more neurons -> prevent overfit in complex models or datasets with limited samples
     'exploration_rate': (0.1, 0.5), #Epsilon /Higher more exploration -> Possibly better actions /Lower -> More stability using learned policy
     
@@ -56,7 +56,7 @@ CHROMOSOME_LENGTH, NUM_GENERATIONS = 15, 5 # param_ranges items
 class GeneticAlgorithm:
 
 
-    def __init__(self, POPULATION_SIZE, CHROMOSOME_LENGTH, param_ranges, MUTATION_RATE, NUM_GENERATIONS):
+    def __init__(self, POPULATION_SIZE, CHROMOSOME_LENGTH, param_ranges, MUTATION_RATE, NUM_GENERATIONS, game, neural_network_architecture):
         self.population_size = POPULATION_SIZE 
         self.num_generations = NUM_GENERATIONS
         self.param_ranges = param_ranges #dictionary upstairs
@@ -64,6 +64,8 @@ class GeneticAlgorithm:
         self.population = self.generate_population(self.population_size, self.param_ranges, self.chromosome_length)
         self.mutation_rate = MUTATION_RATE
         self.crossover_rate = CROSSOVER_RATE
+        self.game = game
+        self.neural_network_architecture = neural_network_architecture
 
     def generate_population(self, population_size, param_ranges, chromosome_length): #Random init or heuristic init (using prior info)
         #check if working
@@ -297,8 +299,8 @@ class GeneticAlgorithm:
 # pop size usually between 20 and 50
 # chromosome length = (11 * 256) + 256 + (256 * 3) + 3 = 3075 (neural network)
 
-if __name__ == "__main__": 
-    ga = GeneticAlgorithm(population_size = POPULATION_SIZE, chromosome_length = CHROMOSOME_LENGTH, param_ranges = param_ranges,
-                          mutation_rate = MUTATION_RATE) #Initialized  
-    best_agents = GeneticAlgorithm().genetic(num_generations = NUM_GENERATIONS)
-    print(best_agents)
+# if __name__ == "__main__": 
+#     ga = GeneticAlgorithm(population_size = POPULATION_SIZE, chromosome_length = CHROMOSOME_LENGTH, param_ranges = param_ranges,
+#                           mutation_rate = MUTATION_RATE) #Initialized  
+#     best_agents = GeneticAlgorithm().genetic(num_generations = NUM_GENERATIONS)
+#     print(best_agents)

@@ -40,23 +40,61 @@ if random_number < epsilon:
 else:
    select_action_with_highest_q_value()"""
 
-# IMMUTABLE VARIABLES
+# VARIABLES
 
 MAX_MEMORY = 100_000 # Maximum memory for the agent  
-BATCH_SIZE = 1000 # Batch size for training
-ALPHA = 0.01  # Learning rate for the model
+batch_size = 1000 # Batch size for training
+alpha = 0.01  # Learning rate for the model
+
+param_ranges = {
+    # Continuous parameters
+    'learning_rate': (0.001, 0.1), # Alpha / Higher values allow faster learning, while lower values ensure more stability
+    'discount_factor': (0.9, 0.999), #Gamme / Closer to 1 indicate future rewards are highly important, emphasizing long-term rewards
+    'dropout_rate': (0.1, 0.5), # Higher drops out a more neurons -> prevent overfit in complex models or datasets with limited samples
+    'exploration_rate': (0.1, 0.5), #Epsilon /Higher more exploration -> Possibly better actions /Lower -> More stability using learned policy
+    
+    # Discrete parameters
+    'batch_size': [10, 100, 250, 500, 1000, 2000, 5000], # Number of experiences sampled from the replay buffer for training.
+    'activation_function': ['relu', 'sigmoid', 'tanh'],
+    'optimizer': ['adam', 'sgd', 'rmsprop'], 
+    
+    # Integer parameters (num_inputs, num_outputs of NN)
+    'num_hidden_layers': [1, 2, 3, 4, 5],
+    'neurons_per_layer': [32, 64, 128, 256, 512, 1024]
+
+    # Other parameters
+    #'MAX_MEMORY' -> capacity of replay memory
+}
+
+MUTATION_RATE = 0.1
+CROSSOVER_RATE = 0.8
+POPULATION_SIZE = 20
+CHROMOSOME_LENGTH, NUM_GENERATIONS = 15, 5 
+
+
 
 class QLearningAgent:
 
-    def __init__(self):
+    def __init__(self, parameters):
         self.n_games = 0 # Number of games played
-        self.epsilon = 0 # Parameter for exploration-exploitation trade-off
-        self.gamma = 0.9 # Discount factor for future rewards
+        self.epsilon = parameters.get('exploration_rate', 0.0) # Parameter for exploration-exploitation trade-off
+        self.gamma = parameters.get('discount_factor', 0.9) # Discount factor for future rewards
         self.memory = deque(maxlen=MAX_MEMORY) # Replay memory for storing experiences
-        self.model = LinearQNet(11, 256, 3) # Neural network model (input size, hidden size, output size) ----- GA
-        self.trainer = QTrainer(self.model, lr=ALPHA, gamma=self.gamma) # QTrainer for model training -- GA
-        self.replay_buffer = ReplayBuffer(capacity=BATCH_SIZE)
-        self.target_model = LinearQNet(11, 256, 3)
+
+        input_size = parameters.get('input_size', 11)
+        hidden_size = parameters.get('neurons_per_layer', 256)
+        output_size = parameters.get('output_size', 3)
+        dropout_rate = parameters.get('dropout_rate', 0.2)
+        num_hidden_layers = parameters.get('num_hidden_layers', 1)
+        activation_function = parameters.get('activation_function', 'relu')
+        self.model = LinearQNet(input_size, hidden_size, output_size, dropout_rate, num_hidden_layers, activation_function)
+        
+
+        self.lr = parameters.get('learning_rate', alpha)
+        self.trainer = QTrainer(self.model, lr = self.lr, gamma = self.gamma) 
+        self.batch_size = parameters.get('batch_size', batch_size)
+        self.replay_buffer = ReplayBuffer(capacity = self.batch_size)
+        self.target_model = LinearQNet(input_size, hidden_size, output_size, dropout_rate, num_hidden_layers, activation_function)
         self.target_model.load_state_dict(self.model.state_dict())  # Sync initial weights
 
 
@@ -115,17 +153,17 @@ class QLearningAgent:
 
     """Sample from memory and perform a training step using QTrainer"""
     def train_long_memory(self):
-        if len(self.memory) > BATCH_SIZE:
-            mini_sample = random.sample(self.memory, BATCH_SIZE) # List of tuples
+        if len(self.memory) > self.batch_size:
+            mini_sample = random.sample(self.memory, self.batch_size) # List of tuples
         else:
             mini_sample = self.memory
 
         states, actions, rewards, next_states, dones = zip(*mini_sample)
-        self.trainer.train_step(states, actions, rewards, next_states, dones, ReplayBuffer, BATCH_SIZE)
+        self.trainer.train_step(states, actions, rewards, next_states, dones, ReplayBuffer, self.batch_size)
 
     """Perform single training step using a single experience tuple (short-term memory)"""
     def train_short_memory(self, state, action, reward, next_state, done):
-        self.trainer.train_step(state, action, reward, next_state, done, ReplayBuffer, BATCH_SIZE)
+        self.trainer.train_step(state, action, reward, next_state, done, ReplayBuffer, self.batch_size)
 
     """Select actions based on an epsilon-greedy strategy, balancing exploration and exploitation in the agent's decision-making process.
     - 1. Epsilon Decay; 2. Action Selection; 3. Outcome"""
@@ -145,7 +183,7 @@ class QLearningAgent:
         return final_move
 
 
-def train_and_record(self, record_duration):
+def train_and_record(self):
     plotter = TrainingPlot() # To store game scores for plotting
     plot_scores = [] # To store mean scores for plotting  
     plot_mean_scores = []  # To store mean scores for plotting 
@@ -153,11 +191,15 @@ def train_and_record(self, record_duration):
     record = 0
     agent = QLearningAgent() # Initialize the agent
     game = SnakeGameAI() # Initialize the game environment
+    genetic = GeneticAlgorithm(population_size = POPULATION_SIZE, chromosome_length = CHROMOSOME_LENGTH, param_ranges = param_ranges, 
+                          mutation_rate = MUTATION_RATE, num_generations = NUM_GENERATIONS, game = self.game, 
+                          neural_network_architecture = self.model)
 
     while True: 
         state_old = agent.get_state(game)
         final_move = agent.get_action(state_old)
         reward, done, score, deaths, stepped = game.play_step(final_move)
+        self.score = score
         state_new = agent.get_state(game)
         agent.train_short_memory(state_old, final_move, reward, state_new, done)
         agent.remember(state_old, final_move, reward, state_new, done)
@@ -179,5 +221,10 @@ def train_and_record(self, record_duration):
             plot_mean_scores.append(mean_score)
             plotter.update(plot_scores, plot_mean_scores)
 
-if __name__ == "__main__":   
-    train_and_record(10000)
+
+            best_agents = genetic.evolve(self.num_generations)
+
+            agent = QLearningAgent(parameters = best_agents)
+
+if __name__ == "__main__": 
+    train_and_record()

@@ -22,21 +22,40 @@ class ReplayBuffer:
     def __len__(self):
         return len(self.buffer)
 
-class LinearQNet(nn.Module):
-    def __init__(self, input_size, hidden_size, output_size):
+class LinearQNet(nn.Module): #
+    def __init__(self, input_size, hidden_size, output_size, dropout_value, num_hidden_layers, activation_function):
         super().__init__()
-        self.linear1 = nn.Linear(input_size, hidden_size)
-        self.linear2 = nn.Linear(hidden_size, output_size)
-        self.dropout = nn.Dropout(0.2)  # Example: Adding dropout with p=0.2
 
-        # Initialize weights using Xavier initialization
-        nn.init.xavier_uniform_(self.linear1.weight)
-        nn.init.xavier_uniform_(self.linear2.weight)
+        self.layers = nn.ModuleList() # ModuleList to store dynamically created layers
+        
+        self.layers.append(nn.Linear(input_size, hidden_size)) # Input
+        self.layers.append(nn.Dropout(dropout_value))  
+        self.layers.append(self.get_activation(activation_function)) 
+
+        for _ in range(num_hidden_layers):
+            self.layers.append(nn.Linear(hidden_size, hidden_size))  # Hidden layer
+            self.layers.append(nn.Dropout(dropout_value))  
+            self.layers.append(self.get_activation(activation_function))  
+
+        self.layers.append(nn.Linear(hidden_size, output_size)) # Output
+
+        for layer in self.layers: # Init with Xavier weights
+            if isinstance(layer, nn.Linear):
+                nn.init.xavier_uniform_(layer.weight)
+
+    def get_activation(self, name):
+        if name == 'relu':
+            return nn.ReLU()
+        elif name == 'sigmoid':
+            return nn.Sigmoid()
+        elif name == 'tanh':
+            return nn.Tanh()
+        else:
+            raise ValueError(f"Activation function '{name}' not supported.")
 
     def forward(self, x):
-        x = F.relu(self.linear1(x))
-        x = self.dropout(x)  # Applying dropout
-        x = self.linear2(x)
+        for layer in self.layers:
+            x = layer(x)
         return x
 
     def save(self, file_name='model.pth'):
@@ -49,14 +68,16 @@ class LinearQNet(nn.Module):
 
 
 class QTrainer:
-    def __init__(self, model, lr, gamma, target_update_freq = 1000):
+    def __init__(self, model, lr, gamma, optimizer_name):
         self.lr = lr
         self.gamma = gamma
         self.model = model
+        self.optimizer_name = optimizer_name
+        self.optimizer = self.get_optimizer(optimizer_name)
         self.optimizer = optim.Adam(model.parameters(), lr=self.lr)
         self.criterion = nn.MSELoss()
-        self.target_update_freq = target_update_freq
         self.target_update_counter = 0
+
 
     def update_target(self):
         self.target_model.load_state_dict(self.model.state_dict())
