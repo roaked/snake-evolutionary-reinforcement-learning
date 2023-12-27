@@ -256,13 +256,12 @@ class GeneticAlgorithm:
 
         for generation in range(num_generations):
             # Evaluate fitness for each chromosome in the population
-            fitness_scores = [self.fitness_function(chromosome) for chromosome in self.population]
-            fitness_scores2 = self.calculate_population_fitness(self.population) 
+            #fitness_scores = [self.fitness_function(chromosome) for chromosome in self.population]
+            fitness_scores = self.calculate_population_fitness(self.population) 
             """Compare both"""
 
             # Select high-performing chromosomes (using tournament selection)
             selected_population = self.selection(self.population, fitness_scores)
-            selected_population2 = self.selection(self.population, fitness_scores2)
 
             # Create offspring through crossover and mutation
             offspring = []
