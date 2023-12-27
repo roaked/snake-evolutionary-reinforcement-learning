@@ -77,7 +77,7 @@ class QLearningAgent:
 
     def __init__(self, parameters):
         self.n_games = 0 # Number of games played
-        self.epsilon = parameters.get('exploration_rate', 0.0) # Parameter for exploration-exploitation trade-off
+        self.epsilon = parameters.get('exploration_rate', 0.3) # Parameter for exploration-exploitation trade-off
         self.gamma = parameters.get('discount_factor', 0.9) # Discount factor for future rewards
         self.memory = deque(maxlen=MAX_MEMORY) # Replay memory for storing experiences
 

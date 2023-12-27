@@ -321,16 +321,15 @@ class GeneticAlgorithm:
                 # For instance, print them
                 print(f"Score: {score}, Record: {record}, Steps: {steps}, Collisions: {collisions}, Same Positions: {same_positions}")
 
-            current_best_chromosome = max(self.population, key=lambda game_metrics_list: self.fitness_function
-                                          (game_metrics_list['score'], game_metrics_list['record'], game_metrics_list['steps'],
-                                            game_metrics_list['collisions'], game_metrics_list['same_positions_counter']))
-            current_best_fitness = self.fitness_function(current_best_chromosome)
-            best_agents.append((current_best_chromosome, current_best_fitness))
+            for parameters in self.population:
+                fitness = self.fitness_function(score, record, steps, collisions, same_positions_counter)
+                if fitness > best_fitness:
+                    best_fitness = fitness
+                    best_parameters = parameters.copy()
 
-            if current_best_fitness > best_fitness:
-                best_parameters = current_best_chromosome  # Update best parameters
-                best_fitness = current_best_fitness
-            print(f"Generation {generation}: Best Chromosome - {current_best_chromosome}, Fitness - {current_best_fitness}")
+                best_agents.append((parameters, fitness))
+
+            print(f"Generation {generation}: Best Parameters - {best_parameters}, Fitness - {best_fitness}")
 
         return best_agents, best_parameters, best_fitness
 
