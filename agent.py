@@ -192,6 +192,8 @@ def train():
     plot_mean_scores = []  # To store mean scores for plotting 
     total_score = 0
     record = 0
+    visited_positions = set() # Unique Values
+    same_positions_counter = 0
 
     # Initialize the agent with random parameters from param_range
     agent = QLearningAgent(parameters = random_params) 
@@ -223,12 +225,25 @@ def train():
         agent.train_short_memory(state_old, final_move, reward, state_new, done)
         agent.remember(state_old, final_move, reward, state_new, done)
 
+        # Get the current position of the snake's head
+        current_position = (game.snake[0].x, game.snake[0].y)
+
+        if current_position in visited_positions:
+            same_positions_counter += 1
+
+        # Add the current position to the set of visited positions
+        visited_positions.add(current_position)
+            
+        # # Check if the snake's head position has been visited before
+        # same_positions = len(visited_positions) != len(set(visited_positions))
+
         # Store game metrics in a dictionary
         game_metrics = {
             'score': score,
             'record': record,
             'steps': steps,
-            'collisions': collisions
+            'collisions': collisions,
+            'same_positions': same_positions_counter
         }
         game_metrics_list.append(game_metrics)
 
@@ -255,11 +270,12 @@ def train():
 
             # Pass game metrics to the genetic algorithm after each game
             _, best_parameters, _ = genetic.genetic(NUM_GENERATIONS, score = score, record = record, steps = steps, 
-                                                    collisions = collisions, same_positions = same_positions,  
+                                                    collisions = collisions, same_positions = same_positions_counter,  
                                                     game_metrics=game_metrics_list[-1])
             
             # Reinitialize the agent with the best parameters for the next game
             agent = QLearningAgent(parameters = best_parameters)
+            same_positions_counter = 0
 
 if __name__ == "__main__": 
     random_params = create_random_parameters(param_ranges)
