@@ -131,10 +131,10 @@ class QTrainer:
         loss.backward()
         self.optimizer.step()
 
-        # Update target network periodically
-        self.target_update_counter += 1
-        if self.target_update_counter % self.target_update_freq == 0:
-            self.update_target()
+        # # Update target network periodically
+        # self.target_update_counter += 1
+        # if self.target_update_counter % self.target_update_freq == 0:
+        #     self.update_target()
 
     def train(self, replay_buffer, batch_size):
         if len(replay_buffer) < batch_size:

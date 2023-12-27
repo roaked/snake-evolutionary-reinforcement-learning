@@ -195,12 +195,16 @@ def train_and_record(record_duration):
     record = 0
     agent = QLearningAgent(parameters = random_params) # Initialize the agent
     game = SnakeGameAI() # Initialize the game environment
-    genetic = GeneticAlgorithm(population_size = POPULATION_SIZE, chromosome_length = CHROMOSOME_LENGTH, param_ranges = param_ranges, 
-                          mutation_rate = MUTATION_RATE, num_generations = NUM_GENERATIONS, game = game.game, 
-                          neural_network_architecture = agent.model)
+    genetic = GeneticAlgorithm(
+                            POPULATION_SIZE = POPULATION_SIZE,
+                            CHROMOSOME_LENGTH = CHROMOSOME_LENGTH,
+                            param_ranges = param_ranges, 
+                            MUTATION_RATE = MUTATION_RATE,
+                            NUM_GENERATIONS = NUM_GENERATIONS,
+                            game = game, 
+                            neural_network_architecture = agent.model
+                            )
     
-    
-
     while True: 
         state_old = agent.get_state(game)
         final_move = agent.get_action(state_old)
