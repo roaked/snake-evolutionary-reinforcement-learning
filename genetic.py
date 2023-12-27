@@ -108,45 +108,29 @@ class GeneticAlgorithm:
     
     
     def fitness_function(self, score, record, steps, collisions, same_positions_counter): #from current state
-        """Metrics"""
-        # record -> highest score achieved thus far -> (score variable in agent.py)
-        # score -> current score (# apples eaten)
-        # collisions -> number of deaths thus far -> should be = (game number - 1)
-        # steps -> number of steps to eat / reset when apple is eaten or dead
-        
-        """Weights"""
-        weight_score = 0.6
-        weight_collisions, MAX_COLLISIONS = 0.2, 200 # Max collisions
-        weight_steps, MAX_POSSIBLE_STEPS = 0.2, 200 # Avg steps to eat food
+        """Metrics and weights"""
+        weight_score = 0.75
+        weight_steps, MAX_POSSIBLE_STEPS = 0.25, 200
 
-         
         """Normalize metrics"""
         normalized_score = score / record if record != 0 else 0
-        normalized_collisions = 1 - (collisions / MAX_COLLISIONS) if MAX_COLLISIONS != 0 else 0 #Penalizes alot of deaths/collisions
-        normalized_steps = 1 - (steps / MAX_POSSIBLE_STEPS) if MAX_POSSIBLE_STEPS != 0 else 0 #Penalizes excessive steps to incentivize efficiency
+        normalized_steps = 1 - (steps / MAX_POSSIBLE_STEPS) if MAX_POSSIBLE_STEPS != 0 else 0
 
-        # Penalize collisions (20%)
-        penalty_collisions = 0.2 if normalized_collisions > 0.5 else 0  # Penalize frequent collisions
-
-        # Penalty for 100 steps without score increase (10%)
-        penalty_steps = 0.10 if normalized_steps < 0.5 else 0  
-
-        # Penalty for revisiting same positions (15%)
-        penalty_same_positions = 0.15 if same_positions_counter > 30 else 0 # Head revisits 30 times
+        # Penalty for revisiting same positions > 30
+        penalty_same_positions = 0.05 if same_positions_counter > 30 else 0
 
         # Efficiency decay (5%)
-        efficiency_decay = max(0, (steps - score) / MAX_POSSIBLE_STEPS)  # Measure deviation from optimal steps for score
-        penalty_efficiency_decay = 0.05 * efficiency_decay  # Penalize for efficiency decay
+        efficiency_decay = max(0, (steps - score) / MAX_POSSIBLE_STEPS)
+        penalty_efficiency_decay = 0.05 * efficiency_decay
 
+        # Calculate fitness
         fitness = (
-            (normalized_score ** weight_score) *
-            (normalized_steps ** weight_steps) *
-            (normalized_collisions ** weight_collisions) -
-            penalty_steps - penalty_collisions  -
+            (normalized_score * weight_score) +
+            (normalized_steps * weight_steps) -
             penalty_same_positions - penalty_efficiency_decay
         )
 
-        return fitness
+        return max(0, fitness)  # Ensure non-negative fitness
     
     def calculate_population_fitness(self, population, game_metrics_list):
 
@@ -181,6 +165,10 @@ class GeneticAlgorithm:
     
     def selection(self, population, fitness_scores):
         # Normalize fitness scores to probabilities
+        print('\n')
+        print("Fitness Scores:", fitness_scores)
+        print('\n')
+
         total_fitness = sum(fitness_scores)
         probabilities = [fitness / total_fitness for fitness in fitness_scores] # List Comprehension - Probabilities Array
 
