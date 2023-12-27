@@ -188,11 +188,13 @@ def create_random_parameters(param_ranges): # For initialization of a population
 
 def train():
     plotter = TrainingPlot() # To store game scores for plotting
-    plot_scores = [] # To store mean scores for plotting  
+    plot_scores = [] # To store scores for plotting  
     plot_mean_scores = []  # To store mean scores for plotting 
     total_score = 0
     record = 0
-    agent = QLearningAgent(parameters = random_params) # Initialize the agent
+
+    # Initialize the agent with random parameters from param_range
+    agent = QLearningAgent(parameters = random_params) 
     game = SnakeGameAI() # Initialize the game environment
     genetic = GeneticAlgorithm(
                             POPULATION_SIZE = POPULATION_SIZE,
@@ -255,7 +257,8 @@ def train():
             _, best_parameters, _ = genetic.genetic(NUM_GENERATIONS, score = score, record = record, steps = steps, 
                                                     collisions = collisions, same_positions = same_positions,  
                                                     game_metrics=game_metrics_list[-1])
-
+            
+            # Reinitialize the agent with the best parameters for the next game
             agent = QLearningAgent(parameters = best_parameters)
 
 if __name__ == "__main__": 
