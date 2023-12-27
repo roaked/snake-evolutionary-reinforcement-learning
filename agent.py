@@ -207,34 +207,54 @@ def train():
     game_metrics_list = []  # List to store game metrics (score, record, steps, collisions, same positions)
     
     while True: 
-        state_old = agent.get_state(game)
+        # Capture the state before taking an action
+        state_old = agent.get_state(game) 
+        # Determine the next move/action using the RL agent
         final_move = agent.get_action(state_old)
+        # Execute the selected move and observe the game's response
         reward, done, score, collisions, steps = game.play_step(final_move)
+        # Update the agent's internal score
         game.score = score
+        # Capture the new state after the action
         state_new = agent.get_state(game)
+        # Train the agent using this experience
         agent.train_short_memory(state_old, final_move, reward, state_new, done)
         agent.remember(state_old, final_move, reward, state_new, done)
 
-        if done:
+        # Store game metrics in a dictionary
+        game_metrics = {
+            'score': score,
+            'record': record,
+            'steps': steps,
+            'collisions': collisions
+        }
+        game_metrics_list.append(game_metrics)
+
+        if done: # He is dead
+            # Initialize the game for the next iteration
             game._init_game()
             agent.n_games += 1
             agent.train_long_memory()
 
+            # Update the highest record if the current score surpasses
             if score > record:
                 record = score
                 agent.model.save()
 
             print('Game', agent.n_games, 'Score', score, 'Record:', record)
 
+
+            # Update plot data for visualization
             plot_scores.append(score)
             total_score += score
             mean_score = total_score / agent.n_games
             plot_mean_scores.append(mean_score)
             plotter.update(plot_scores, plot_mean_scores)
 
-            #After each game, storing score, highest record so far, steps in that game
+            # Pass game metrics to the genetic algorithm after each game
             _, best_parameters, _ = genetic.genetic(NUM_GENERATIONS, score = score, record = record, steps = steps, 
-                                                    collisions = collisions, same_positions = same_positions)
+                                                    collisions = collisions, same_positions = same_positions,  
+                                                    game_metrics=game_metrics_list[-1])
 
             agent = QLearningAgent(parameters = best_parameters)
 

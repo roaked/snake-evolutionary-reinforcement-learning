@@ -151,13 +151,13 @@ class GeneticAlgorithm:
 
         return fitness
     
-    def calculate_population_fitness(self, score, record, collisions, steps, same_positions, game_metrics_list):
+    def calculate_population_fitness(self, score, record, collisions, steps, same_positions, game_metrics):
         fitness_scores = []
 
-        for metric in game_metrics_list: #last 5 games while length > 5?
+        for metric in game_metrics: #last 5 games while length > 5?
             
             # Calculate fitness based on game performance
-            fitness = self.calculate_fitness(score, steps, collisions)
+            fitness = self.fitness_function(score, record, steps, collisions, same_positions)
 
             # Store fitness score for this set of parameters
             fitness_scores.append(fitness)
@@ -252,7 +252,7 @@ class GeneticAlgorithm:
 
      ##############################################################################################################################
 
-    def genetic(self, num_generations, score, record, steps, collisions, same_positions, game_metrics_list):
+    def genetic(self, num_generations, score, record, steps, collisions, same_positions, game_metrics):
 
         best_parameters = None 
         best_fitness = float('-inf')  
@@ -261,7 +261,7 @@ class GeneticAlgorithm:
         for generation in range(num_generations):
             # Evaluate fitness for each chromosome in the population
             #fitness_scores = [self.fitness_function(chromosome) for chromosome in self.population]
-            fitness_scores = self.calculate_population_fitness(self.population, score, record, steps, collisions, same_positions, game_metrics_list) 
+            fitness_scores = self.calculate_population_fitness(self.population, score, record, steps, collisions, same_positions, game_metrics) 
             """Compare both"""
 
             # Select high-performing chromosomes (using tournament selection)
