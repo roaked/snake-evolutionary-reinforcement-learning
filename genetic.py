@@ -161,7 +161,7 @@ class GeneticAlgorithm:
     
     ##############################################################################################################################
     
-    fitness_scores = calculate_population_fitness(population)
+    #fitness_scores = calculate_population_fitness(population)
     
     ##############################################################################################################################
     
@@ -191,8 +191,8 @@ class GeneticAlgorithm:
     ##############################################################################################################################
 
 
-    selected_population = selection(population = population, fitness_scores = fitness_scores) # Put at the end of code after implementation
-    parent1, parent2 = random.sample(selected_population, 2) # Put at the end of code after implementation
+    # selected_population = selection(population = population, fitness_scores = fitness_scores) # Put at the end of code after implementation
+    # parent1, parent2 = random.sample(selected_population, 2) # Put at the end of code after implementation
     
     """Single-point crossover for two parent individuals. Can explore two-point crossover, uniform crossover, elitist crossover, etc."""
     def crossover(self, parent1, parent2, crossover_rate):
@@ -212,7 +212,7 @@ class GeneticAlgorithm:
             return parent1, parent2 # If crossover doesn't happen, return the parents
     
     
-    offspring1, offspring2 = crossover(parent1, parent2, crossover_rate = CROSSOVER_RATE)  # Put at the end of code after implementation
+    # offspring1, offspring2 = crossover(parent1, parent2, crossover_rate = CROSSOVER_RATE)  # Put at the end of code after implementation
 
 
     """According to Genetic Algorithm, after crossover (breeding), we apply mutation to the resulting offspring to introduce
@@ -229,13 +229,13 @@ class GeneticAlgorithm:
             mutated_individual.append(mutated_gene)
         return mutated_individual
     
-    mutated_offspring1 = mutation(offspring1, mutation_rate = MUTATION_RATE)
-    mutated_offspring2 = mutation(offspring2, mutation_rate = MUTATION_RATE)
+    # mutated_offspring1 = mutation(offspring1, mutation_rate = MUTATION_RATE)
+    # mutated_offspring2 = mutation(offspring2, mutation_rate = MUTATION_RATE)
 
 
 
     ##############################################################################################################################
-    """My notes"""
+    """My notes
 
     population = generate_population(population_size = POPULATION_SIZE, param_ranges = param_ranges, chromosome_length = CHROMOSOME_LENGTH)
     fitness_scores = calculate_population_fitness(population = population)
@@ -243,12 +243,14 @@ class GeneticAlgorithm:
     parent1, parent2 = random.sample(selected_population, 2) # Put at the end of code after implementation
     offspring1, offspring2 = crossover(parent1, parent2)  # Put at the end of code after implementation
     mutated_offspring1 = mutation(offspring1, mutation_rate = MUTATION_RATE)
-    mutated_offspring2 = mutation(offspring2, mutation_rate = MUTATION_RATE)
+    mutated_offspring2 = mutation(offspring2, mutation_rate = MUTATION_RATE)"""
 
      ##############################################################################################################################
 
     def genetic(self, num_generations):
 
+        best_parameters = None 
+        best_fitness = float('-inf')  
         best_agents = [] # Store best
         #population = self.generate_population(self.population_size, self.param_ranges) #No need, already initialized in __init__
 
@@ -287,13 +289,16 @@ class GeneticAlgorithm:
             self.population = random.sample(offspring, self.population_size - elite_count)
 
             # Store information on the best agent of this generation
-            best_chromosome = max(self.population, key=self.fitness_function)
-            best_fitness = self.fitness_function(best_chromosome)
-            best_agents.append((best_chromosome, best_fitness))
+            current_best_chromosome = max(self.population, key=self.fitness_function)
+            current_best_fitness = self.fitness_function(current_best_chromosome)
+            best_agents.append((current_best_chromosome, current_best_fitness))
 
-            print(f"Generation {generation}: Best Chromosome - {best_chromosome}, Fitness - {best_fitness}")
+            if current_best_fitness > best_fitness:
+                best_parameters = current_best_chromosome  # Update best parameters
+                best_fitness = current_best_fitness
+            print(f"Generation {generation}: Best Chromosome - {current_best_chromosome}, Fitness - {current_best_fitness}")
 
-        return best_agents
+        return best_agents, best_parameters, best_fitness
 
 
 # pop size usually between 20 and 50

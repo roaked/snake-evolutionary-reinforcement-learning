@@ -74,10 +74,18 @@ class QTrainer:
         self.model = model
         self.optimizer_name = optimizer_name
         self.optimizer = self.get_optimizer(optimizer_name)
-        self.optimizer = optim.Adam(model.parameters(), lr=self.lr)
         self.criterion = nn.MSELoss()
         self.target_update_counter = 0
 
+    def get_optimizer(self, name):
+        if name == 'adam':
+            return optim.Adam(self.model.parameters(), lr=self.lr)
+        elif name == 'sgd':
+            return optim.SGD(self.model.parameters(), lr=self.lr)
+        elif name == 'rmsprop':
+            return optim.RMSprop(self.model.parameters(), lr=self.lr)
+        else:
+            raise ValueError(f"Optimizer '{name}' not supported.")
 
     def update_target(self):
         self.target_model.load_state_dict(self.model.state_dict())

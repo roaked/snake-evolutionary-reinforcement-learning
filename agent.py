@@ -182,24 +182,30 @@ class QLearningAgent:
 
         return final_move
 
+def create_random_parameters(param_ranges):
+    return {param: random.uniform(*ranges) if isinstance(ranges, tuple) else random.choice(ranges)
+            for param, ranges in param_ranges.items()}
 
-def train_and_record(self):
+def train_and_record(record_duration):
     plotter = TrainingPlot() # To store game scores for plotting
     plot_scores = [] # To store mean scores for plotting  
     plot_mean_scores = []  # To store mean scores for plotting 
-    total_score = 0 
+    total_score = 0
+    record_duration = record_duration
     record = 0
-    agent = QLearningAgent() # Initialize the agent
+    agent = QLearningAgent(parameters = random_params) # Initialize the agent
     game = SnakeGameAI() # Initialize the game environment
     genetic = GeneticAlgorithm(population_size = POPULATION_SIZE, chromosome_length = CHROMOSOME_LENGTH, param_ranges = param_ranges, 
-                          mutation_rate = MUTATION_RATE, num_generations = NUM_GENERATIONS, game = self.game, 
-                          neural_network_architecture = self.model)
+                          mutation_rate = MUTATION_RATE, num_generations = NUM_GENERATIONS, game = game.game, 
+                          neural_network_architecture = agent.model)
+    
+    
 
     while True: 
         state_old = agent.get_state(game)
         final_move = agent.get_action(state_old)
         reward, done, score, deaths, stepped = game.play_step(final_move)
-        self.score = score
+        game.score = score
         state_new = agent.get_state(game)
         agent.train_short_memory(state_old, final_move, reward, state_new, done)
         agent.remember(state_old, final_move, reward, state_new, done)
@@ -222,9 +228,10 @@ def train_and_record(self):
             plotter.update(plot_scores, plot_mean_scores)
 
 
-            best_agents = genetic.evolve(self.num_generations)
+            best_agent, best_parameters, best_fitness = genetic(genetic.num_generations)
 
-            agent = QLearningAgent(parameters = best_agents)
+            agent = QLearningAgent(parameters = best_parameters)
 
 if __name__ == "__main__": 
-    train_and_record()
+    random_params = create_random_parameters(param_ranges)
+    train_and_record(record_duration = 5000)
