@@ -28,9 +28,6 @@ param_ranges = {
     # Integer parameters (num_inputs, num_outputs of NN)
     'num_hidden_layers': [1, 2, 3, 4, 5],
     'neurons_per_layer': [32, 64, 128, 256, 512, 1024]
-
-    # Other parameters
-    #'MAX_MEMORY' -> capacity of replay memory
 }
 
 """Variables to use for the Genetic Algorithm"""
@@ -79,7 +76,6 @@ class GeneticAlgorithm:
 
     def generate_population(self, population_size, param_ranges, chromosome_length): #Random init or heuristic init (using prior info)
         population = []
-        chromosome_length = len(param_ranges)
         for _ in range(population_size):
             params = {}
             for param, value_range in param_ranges.items():
