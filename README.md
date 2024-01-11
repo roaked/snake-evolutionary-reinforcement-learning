@@ -3,15 +3,7 @@
 
 ![213d](https://miro.medium.com/v2/resize:fit:2800/1*zRZ46MeFZMd5F52CHM6EYA.png)
 
-## Undergoing dev // Functions might be outdated
-
-
-General Fixes:
-
-- Script for recording / saving game states (done, but freezing after ending)
-- Genetic cost function: F = total_score * 5000 - deaths * 150 - avg_steps * 100 - penalties*1000 (test)
-- Mutation /crossover rate defining
-
+[Risto Miikkulainen and Lex Fridman discussing the importance of integration of Evolutionary Computation in Deep Networks (assessing hypermateres such as depth of layer or the architecture topology](https://www.youtube.com/watch?v=R6zStewfuZs)
 
 
 
