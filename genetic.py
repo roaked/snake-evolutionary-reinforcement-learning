@@ -19,15 +19,6 @@ param_ranges = {
     'discount_factor': (0.9, 0.999), #Gamma / Closer to 1 indicate future rewards are highly important, emphasizing long-term rewards
     'dropout_rate': (0.1, 0.5), # Higher drops out a more neurons -> prevent overfit in complex models or datasets with limited samples
     'exploration_rate': (0.1, 0.5), #Epsilon /Higher more exploration -> Possibly better actions /Lower -> More stability using learned policy
-    
-    # Discrete parameters
-    'batch_size': [10, 100, 250, 500, 1000, 2000, 5000], # Number of experiences sampled from the replay buffer for training.
-    'activation_function': ['relu', 'sigmoid', 'tanh'],
-    'optimizer': ['adam', 'sgd', 'rmsprop'], 
-    
-    # Integer parameters (num_inputs, num_outputs of NN)
-    'num_hidden_layers': [1, 2, 3, 4, 5],
-    'neurons_per_layer': [32, 64, 128, 256, 512, 1024]
 }
 
 """Variables to use for the Genetic Algorithm"""
@@ -44,11 +35,11 @@ CROSSOVER_RATE = 0.8
 (...)higher crossover rate, closer to 1.0, favors more exploration (diversity), 
 (...)lower crossover rate, closer to 0.6, emphasizes exploitation (convergence)"""
 
-POPULATION_SIZE = 20
+POPULATION_SIZE = 5
 
 """Typical empirical values range from 20 to 50 individuals in a generation"""
  
-CHROMOSOME_LENGTH, NUM_GENERATIONS = 15, 5 # param_ranges items
+CHROMOSOME_LENGTH, NUM_GENERATIONS = 15, 3 # param_ranges items
 
 class GeneticAlgorithm:
 
@@ -92,28 +83,17 @@ class GeneticAlgorithm:
         return population
     
     
-    def fitness_function(self, score, record, steps, collisions, same_positions_counter): #from current state
-        """Metrics and weights"""
-        weight_score = 0.75
-        weight_steps, MAX_POSSIBLE_STEPS = 0.25, 300
+    def fitness_function(self, score, record, steps, collisions, same_positions_counter):
+        # Initialize fitness to 0
+        fitness = 0
 
-        """Normalize metrics"""
-        normalized_score = score / record if record != 0 else 0
-        normalized_steps = 1 - (steps / MAX_POSSIBLE_STEPS) if MAX_POSSIBLE_STEPS != 0 else 0
+        # Calculate the score fitness
+        score_fitness = score**3 * 20000
+        fitness += score_fitness
 
-        # Penalty for revisiting same positions > 30
-        penalty_same_positions = 0.05 if same_positions_counter > 150 else 0
-
-        # Efficiency decay (5%)
-        efficiency_decay = max(0, (steps - score) / MAX_POSSIBLE_STEPS)
-        penalty_efficiency_decay = 0.05 * efficiency_decay
-
-        # Calculate fitness
-        fitness = (
-            (normalized_score * weight_score) +
-            (normalized_steps * weight_steps) -
-            penalty_same_positions - penalty_efficiency_decay
-        )
+        # Calculate the record fitness
+        record_fitness = record**3 * 5000
+        fitness += record_fitness
 
         return max(0, fitness)  # Ensure non-negative fitness
     
@@ -196,12 +176,13 @@ class GeneticAlgorithm:
     
     """Single-point crossover for two parent individuals. Can explore two-point crossover, uniform crossover, elitist crossover, etc."""
     def crossover(self, parent1, parent2, crossover_rate):
+
         if isinstance(parent1, dict) and isinstance(parent2, dict):
             # Convert dictionary values to lists
             parent1 = list(parent1.values())
             parent2 = list(parent2.values())
 
-        assert len(parent1) == len(parent2)  # Only if same length
+        assert len(parent1) == len(parent2) # Only if same len
 
         if random.random() < crossover_rate:
             # Crossover point
@@ -211,37 +192,10 @@ class GeneticAlgorithm:
             offspring1 = parent1[:crossover_point] + parent2[crossover_point:]
             offspring2 = parent2[:crossover_point] + parent1[crossover_point:]
 
-            # Clamp values within the specified ranges
-            offspring1 = self.clamp_values(offspring1)
-            offspring2 = self.clamp_values(offspring2)
-
             return offspring1, offspring2
         else:
-            return parent1, parent2  # If crossover doesn't happen, return the parents
-
-    def clamp_values(self, values):
-        # Assuming values is a list of parameter values
-        clamped_values = []
-        for i, value in enumerate(values):
-            param_name = list(self.param_ranges.keys())[i]
-            
-            if isinstance(value, (int, float)):
-                # Assuming the parameter is a numeric type
-                clamped_value = max(self.param_ranges[param_name][0], min(value, self.param_ranges[param_name][1]))
-            elif isinstance(value, str):
-                # Assuming the parameter is a string type
-                if value not in self.param_ranges[param_name]:
-                    clamped_value = random.choice(self.param_ranges[param_name])
-                else:
-                    clamped_value = value
-            else:
-                # Handle other types as needed
-                clamped_value = value
-            
-            clamped_values.append(clamped_value)
-        
-        return clamped_values
-        
+            return parent1, parent2 # If crossover doesn't happen, return the parents
+    
     
     # offspring1, offspring2 = crossover(parent1, parent2, crossover_rate = CROSSOVER_RATE)  # Put at the end of code after implementation
 
@@ -249,20 +203,27 @@ class GeneticAlgorithm:
     """According to Genetic Algorithm, after crossover (breeding), we apply mutation to the resulting offspring to introduce
     small changes to their genetic material depending on the mutation rate, this helps explores new areas of solution space"""
     def mutation(self, individual, mutation_rate):
+        mutated_individual = individual.copy()
 
-        mutated_individual = []
-        for gene in individual:
-            if random.random() < mutation_rate:
-                try: # Assuming 'gene' is a string that needs to be converted to a numerical type
-                    gene = int(gene)  # Convert 'gene' to an integer
-                    mutated_gene = 1 - gene
-                except ValueError:
-                    print("Conversion to integer failed. 'gene' might not be a numeric value.")
-            else:
-                mutated_gene = gene
-            mutated_individual.append(mutated_gene)
+        if isinstance(individual, list):
+            # Handle list mutation
+            for i in range(len(individual)):
+                if random.random() < mutation_rate:
+                    try:
+                        mutated_individual[i] = max(min(individual[i] + random.uniform(-0.1, 0.1), 1.0), 0.0)
+                    except ValueError:
+                        print("Conversion to float failed. 'gene' might not be a numeric value.")
+        elif isinstance(individual, dict):
+            # Handle dictionary mutation
+            for param, gene in individual.items():
+                if random.random() < mutation_rate:
+                    try:
+                        mutated_gene = max(min(gene + random.uniform(-0.1, 0.1), 1.0), 0.0)
+                        mutated_individual[param] = mutated_gene
+                    except ValueError:
+                        print(f"Mutation failed for parameter '{param}'.")
+
         return mutated_individual
-    
     # mutated_offspring1 = mutation(offspring1, mutation_rate = MUTATION_RATE)
     # mutated_offspring2 = mutation(offspring2, mutation_rate = MUTATION_RATE)
 
@@ -357,30 +318,3 @@ class GeneticAlgorithm:
 
 
 #######################################################################################################################################
-    
-
-class GeneticOldFunctions():
-        
-        def calculate_population_fitness(self, population, score, record, steps, collisions, same_positions_counter): 
-            fitness_scores = []  #pop size usually between 20 and 50 for a generation
-
-            default_values = {'score': 0, 'record': 0, 'steps': 0, 'collisions': 0, 'same_positions': 0}
-
-            # Initializing the population list / Randomize
-            population = [default_values.copy() for _ in range(POPULATION_SIZE)]
-
-            for chromosome in population:
-
-                score = chromosome['score'] 
-                record = chromosome['record']
-                steps = chromosome['steps'] 
-                collisions = chromosome['collisions']  
-                same_positions = chromosome['same_positions'] 
-
-                # Calculate fitness using the function you provided
-                fitness = self.fitness_function(score, record, steps, collisions, same_positions)
-
-                # Store the fitness score for the current chromosome
-                fitness_scores.append(fitness)
-
-            return fitness_scores

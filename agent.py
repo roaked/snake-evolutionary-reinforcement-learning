@@ -4,7 +4,7 @@ import pygame
 import numpy as np
 from collections import deque
 from game import SnakeGameAI, Direction, Point
-from model import LinearQNet, QTrainer, ReplayBuffer
+from model import LinearQNet, QTrainer, ReplayBuffer, MultiLinearQNet
 from plotme import TrainingPlot
 from genetic import GeneticAlgorithm
 
@@ -43,8 +43,6 @@ else:
 # VARIABLES
 
 MAX_MEMORY = 100_000 # Maximum memory for the agent  
-batch_size = 1000 # Batch size for training
-alpha = 0.01  # Learning rate for the model
 
 param_ranges = {
     # Continuous parameters
@@ -54,13 +52,13 @@ param_ranges = {
     'exploration_rate': (0.1, 0.5), #Epsilon /Higher more exploration -> Possibly better actions /Lower -> More stability using learned policy
     
     # Discrete parameters
-    'batch_size': [10, 100, 250, 500, 1000, 2000, 5000], # Number of experiences sampled from the replay buffer for training.
-    'activation_function': ['relu', 'sigmoid', 'tanh'],
-    'optimizer': ['adam', 'sgd', 'rmsprop'], 
+    # 'batch_size': [10, 100, 250, 500, 1000, 2000, 5000], # Number of experiences sampled from the replay buffer for training.
+    # 'activation_function': ['relu', 'sigmoid', 'tanh'],
+    # 'optimizer': ['adam', 'sgd', 'rmsprop'], 
     
     # Integer parameters (num_inputs, num_outputs of NN)
-    'num_hidden_layers': [1, 2, 3, 4, 5],
-    'neurons_per_layer': [32, 64, 128, 256, 512, 1024]
+    # 'num_hidden_layers': [1, 2, 3, 4, 5],
+    # 'neurons_per_layer': [32, 64, 128, 256, 512, 1024]
 
     # Other parameters
     #'MAX_MEMORY' -> capacity of replay memory
@@ -79,22 +77,24 @@ class QLearningAgent:
         self.n_games = 0 # Number of games played
         self.epsilon = parameters.get('exploration_rate', 0.3) # Parameter for exploration-exploitation trade-off
         self.gamma = parameters.get('discount_factor', 0.9) # Discount factor for future rewards
+        self.dropout_rate = parameters.get('dropout_rate', 0.2)
+        self.lr = parameters.get('learning_rate', 0.001)
+        #self.lr = alpha = 0.001
+        #self.dropout_rate = 0.2
+        #self.epsilon = 0.3
+        #self.gamma = 0.9
         self.memory = deque(maxlen=MAX_MEMORY) # Replay memory for storing experiences
-
-        input_size = parameters.get('input_size', 11)
-        hidden_size = parameters.get('neurons_per_layer', 256)
-        output_size = parameters.get('output_size', 3)
-        dropout_rate = parameters.get('dropout_rate', 0.2)
-        num_hidden_layers = parameters.get('num_hidden_layers', 1)
-        activation_function = parameters.get('activation_function', 'relu')
-        self.model = LinearQNet(input_size, hidden_size, output_size, dropout_rate, num_hidden_layers, activation_function)
+        input_size, hidden_size, output_size, num_hidden_layers = 11, 256, 3, 1
+        #num_hidden_layers = parameters.get('num_hidden_layers', 1)
+        #activation_function = parameters.get('activation_function', 'relu')
+        self.model = LinearQNet(input_size, hidden_size, output_size, self.dropout_rate, num_hidden_layers, activation_function = 'relu')
         
-        optimizer = parameters.get('optimizer','adam')
-        self.lr = parameters.get('learning_rate', alpha)
-        self.trainer = QTrainer(self.model, lr = self.lr, gamma = self.gamma, optimizer_name = optimizer) 
-        self.batch_size = parameters.get('batch_size', batch_size)
+        #optimizer = parameters.get('optimizer','adam')
+        self.trainer = QTrainer(self.model, lr = self.lr, gamma = self.gamma, optimizer_name = 'adam') 
+        #self.batch_size = parameters.get('batch_size', batch_size)
+        self.batch_size = 1000 # Learning rate for the model
         self.replay_buffer = ReplayBuffer(capacity = self.batch_size)
-        self.target_model = LinearQNet(input_size, hidden_size, output_size, dropout_rate, num_hidden_layers, activation_function)
+        self.target_model = LinearQNet(input_size, hidden_size, output_size, self.dropout_rate, num_hidden_layers, activation_function = 'relu')
         self.target_model.load_state_dict(self.model.state_dict())  # Sync initial weights
 
 
@@ -196,7 +196,7 @@ def train():
     same_positions_counter = 0
 
     # Initialize the agent with random parameters from param_range
-    agent = QLearningAgent(parameters = random_params) 
+    agent = QLearningAgent(random_params) 
     game = SnakeGameAI() # Initialize the game environment
     genetic = GeneticAlgorithm(
                             POPULATION_SIZE = POPULATION_SIZE,
@@ -280,11 +280,6 @@ def train():
                     'discount_factor',
                     'dropout_rate',
                     'exploration_rate',
-                    'batch_size',
-                    'activation_function',
-                    'optimizer',
-                    'num_hidden_layers',
-                    'neurons_per_layer'
                 ]
             
             # Pair keys with corresponding values from best_params
@@ -295,6 +290,77 @@ def train():
             same_positions_counter = 0
             steps = 0
 
+def train_RL():
+    plotter = TrainingPlot() # To store game scores for plotting
+    plot_scores = [] # To store scores for plotting  
+    plot_mean_scores = []  # To store mean scores for plotting 
+    total_score = 0
+    record = 0
+    visited_positions = set() # Unique Values
+    same_positions_counter = 0
+    agent = QLearningAgent() 
+    game = SnakeGameAI() # Initialize the game environment
+    game_metrics_list = []  # List to store game metrics (score, record, steps, collisions, same positions)
+
+    while True:
+        # get old state
+        state_old = agent.get_state(game)
+
+        # get move
+        final_move = agent.get_action(state_old)
+
+        # perform move and get new state
+        reward, done, score, collisions, steps = game.play_step(final_move)
+        state_new = agent.get_state(game)
+
+        # train short memory
+        agent.train_short_memory(state_old, final_move, reward, state_new, done)
+
+        # remember
+        agent.remember(state_old, final_move, reward, state_new, done)
+
+        # Get the current position of the snake's head
+        current_position = (game.snake[0].x, game.snake[0].y)
+
+        if current_position in visited_positions:
+            same_positions_counter += 1
+
+        # Add the current position to the set of visited positions
+        visited_positions.add(current_position)
+
+        if done:
+            # train long memory, plot result
+            game._init_game()
+            agent.n_games += 1
+            agent.train_long_memory()
+
+            if score > record:
+                record = score
+                agent.model.save()
+
+            print('Game', agent.n_games, 'Score', score, 'Record:', record)
+
+            # Update plot data for visualization
+            plot_scores.append(score)
+            total_score += score
+            mean_score = total_score / agent.n_games
+            plot_mean_scores.append(mean_score)
+            plotter.update(plot_scores, plot_mean_scores)
+
+            # Store game metrics in a dictionary
+            game_metrics = {
+                'score': score,
+                'record': record,
+                'steps': steps,
+                'collisions': collisions,
+                'same_positions': same_positions_counter
+            }
+
+            game_metrics_list.append(game_metrics)
+
+
+
 if __name__ == "__main__": 
     random_params = create_random_parameters(param_ranges)
     train()
+    # train_RL()

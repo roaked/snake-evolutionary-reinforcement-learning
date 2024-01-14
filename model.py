@@ -22,7 +22,7 @@ class ReplayBuffer:
     def __len__(self):
         return len(self.buffer)
 
-class LinearQNet(nn.Module): 
+class MultiLinearQNet(nn.Module): 
     def __init__(self, input_size, hidden_size, output_size, dropout_value, num_hidden_layers, activation_function):
         super().__init__()
 
@@ -30,12 +30,14 @@ class LinearQNet(nn.Module):
         
         self.layers.append(nn.Linear(input_size, hidden_size)) # Input
         self.layers.append(nn.Dropout(dropout_value))  
-        self.layers.append(self.get_activation(activation_function)) 
+        self.layers.append(nn.ReLU())
+        #self.layers.append(self.get_activation(activation_function)) 
 
         for _ in range(num_hidden_layers):
             self.layers.append(nn.Linear(hidden_size, hidden_size))  # Hidden layer
             self.layers.append(nn.Dropout(dropout_value))  
-            self.layers.append(self.get_activation(activation_function))  
+            self.layers.append(nn.ReLU())
+            #self.layers.append(self.get_activation(activation_function))  
 
         self.layers.append(nn.Linear(hidden_size, output_size)) # Output
 
@@ -66,6 +68,24 @@ class LinearQNet(nn.Module):
         file_name = os.path.join(model_folder_path, file_name)
         torch.save(self.state_dict(), file_name)
 
+class LinearQNet(nn.Module):
+    def __init__(self, input_size, hidden_size, output_size, dropout_value, num_hidden_layers, activation_function):
+        super().__init__()
+        self.linear1 = nn.Linear(input_size, hidden_size)
+        self.linear2 = nn.Linear(hidden_size, output_size)
+
+    def forward(self, x):
+        x = F.relu(self.linear1(x))
+        x = self.linear2(x)
+        return x
+
+    def save(self, file_name='model.pth'):
+        model_folder_path = './model'
+        if not os.path.exists(model_folder_path):
+            os.makedirs(model_folder_path)
+
+        file_name = os.path.join(model_folder_path, file_name)
+        torch.save(self.state_dict(), file_name)
 
 class QTrainer:
     def __init__(self, model, lr, gamma, optimizer_name):
@@ -73,7 +93,8 @@ class QTrainer:
         self.gamma = gamma
         self.model = model
         self.optimizer_name = optimizer_name
-        self.optimizer = self.get_optimizer(optimizer_name)
+        self.optimizer = optim.Adam(self.model.parameters(), lr=self.lr)
+        #self.optimizer = self.get_optimizer(optimizer_name)
         self.criterion = nn.MSELoss()
         self.target_update_counter = 0
 
