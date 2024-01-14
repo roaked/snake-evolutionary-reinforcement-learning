@@ -22,7 +22,7 @@ class ReplayBuffer:
     def __len__(self):
         return len(self.buffer)
 
-class LinearQNet(nn.Module): #
+class LinearQNet(nn.Module): 
     def __init__(self, input_size, hidden_size, output_size, dropout_value, num_hidden_layers, activation_function):
         super().__init__()
 

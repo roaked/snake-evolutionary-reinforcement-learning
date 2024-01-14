@@ -1,4 +1,4 @@
-import random, time, itertools
+import random
 import numpy as np
 
 ##############################################################################################################################
@@ -196,13 +196,12 @@ class GeneticAlgorithm:
     
     """Single-point crossover for two parent individuals. Can explore two-point crossover, uniform crossover, elitist crossover, etc."""
     def crossover(self, parent1, parent2, crossover_rate):
-
         if isinstance(parent1, dict) and isinstance(parent2, dict):
             # Convert dictionary values to lists
             parent1 = list(parent1.values())
             parent2 = list(parent2.values())
 
-        assert len(parent1) == len(parent2) # Only if same len
+        assert len(parent1) == len(parent2)  # Only if same length
 
         if random.random() < crossover_rate:
             # Crossover point
@@ -212,10 +211,37 @@ class GeneticAlgorithm:
             offspring1 = parent1[:crossover_point] + parent2[crossover_point:]
             offspring2 = parent2[:crossover_point] + parent1[crossover_point:]
 
+            # Clamp values within the specified ranges
+            offspring1 = self.clamp_values(offspring1)
+            offspring2 = self.clamp_values(offspring2)
+
             return offspring1, offspring2
         else:
-            return parent1, parent2 # If crossover doesn't happen, return the parents
-    
+            return parent1, parent2  # If crossover doesn't happen, return the parents
+
+    def clamp_values(self, values):
+        # Assuming values is a list of parameter values
+        clamped_values = []
+        for i, value in enumerate(values):
+            param_name = list(self.param_ranges.keys())[i]
+            
+            if isinstance(value, (int, float)):
+                # Assuming the parameter is a numeric type
+                clamped_value = max(self.param_ranges[param_name][0], min(value, self.param_ranges[param_name][1]))
+            elif isinstance(value, str):
+                # Assuming the parameter is a string type
+                if value not in self.param_ranges[param_name]:
+                    clamped_value = random.choice(self.param_ranges[param_name])
+                else:
+                    clamped_value = value
+            else:
+                # Handle other types as needed
+                clamped_value = value
+            
+            clamped_values.append(clamped_value)
+        
+        return clamped_values
+        
     
     # offspring1, offspring2 = crossover(parent1, parent2, crossover_rate = CROSSOVER_RATE)  # Put at the end of code after implementation
 
@@ -329,16 +355,6 @@ class GeneticAlgorithm:
 
         return best_agents, best_parameters, best_fitness
 
-
-# pop size usually between 20 and 50
-# chromosome length = (11 * 256) + 256 + (256 * 3) + 3 = 3075 (neural network)
-
-# if __name__ == "__main__": 
-#     ga = GeneticAlgorithm(population_size = POPULATION_SIZE, chromosome_length = CHROMOSOME_LENGTH, param_ranges = param_ranges,
-#                           mutation_rate = MUTATION_RATE) #Initialized  
-#     best_agents = GeneticAlgorithm().genetic(num_generations = NUM_GENERATIONS)
-#     print(best_agents)
-    
 
 #######################################################################################################################################
     
