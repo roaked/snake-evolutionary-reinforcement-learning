@@ -106,12 +106,12 @@ class GeneticAlgorithm:
             last_5_game_metrics = game_metrics_list # Less than 5 games, consider all available
 
         for individual_metrics in last_5_game_metrics:
-            # Extract individual game metrics from the dictionary
             score = individual_metrics['score']
             record = individual_metrics['record']
-            steps = individual_metrics['steps']
-            collisions = individual_metrics['collisions']
-            same_positions_counter = individual_metrics['same_positions']
+
+            # steps = individual_metrics['steps']
+            # collisions = individual_metrics['collisions']
+            # same_positions_counter = individual_metrics['same_positions']
 
             # Calculate fitness based on game performance
             fitness = self.fitness_function(score, record)
