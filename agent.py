@@ -73,16 +73,16 @@ CHROMOSOME_LENGTH, NUM_GENERATIONS = 15, 5
 
 class QLearningAgent:
 
-    def __init__(self, parameters):
+    def __init__(self):
         self.n_games = 0 # Number of games played
-        self.epsilon = parameters.get('exploration_rate', 0.3) # Parameter for exploration-exploitation trade-off
-        self.gamma = parameters.get('discount_factor', 0.9) # Discount factor for future rewards
-        self.dropout_rate = parameters.get('dropout_rate', 0.2)
-        self.lr = parameters.get('learning_rate', 0.001)
-        #self.lr = alpha = 0.001
-        #self.dropout_rate = 0.2
-        #self.epsilon = 0.3
-        #self.gamma = 0.9
+        # self.epsilon = parameters.get('exploration_rate', 0.3) # Parameter for exploration-exploitation trade-off
+        # self.gamma = parameters.get('discount_factor', 0.9) # Discount factor for future rewards
+        # self.dropout_rate = parameters.get('dropout_rate', 0.2)
+        # self.lr = parameters.get('learning_rate', 0.001)
+        self.lr = alpha = 0.001
+        self.dropout_rate = 0.2
+        self.epsilon = 0.3
+        self.gamma = 0.9
         self.memory = deque(maxlen=MAX_MEMORY) # Replay memory for storing experiences
         input_size, hidden_size, output_size, num_hidden_layers = 11, 256, 3, 1
         #num_hidden_layers = parameters.get('num_hidden_layers', 1)
@@ -362,5 +362,5 @@ def train_RL():
 
 if __name__ == "__main__": 
     random_params = create_random_parameters(param_ranges)
-    train()
-    # train_RL()
+    #train()
+    train_RL()
