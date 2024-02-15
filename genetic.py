@@ -39,33 +39,30 @@ POPULATION_SIZE = 5
 
 """Typical empirical values range from 20 to 50 individuals in a generation"""
  
-CHROMOSOME_LENGTH, NUM_GENERATIONS = 15, 3 # param_ranges items
+NUM_GENERATIONS = 3 # param_ranges items
 
 class GeneticAlgorithm:
 
 
-    def __init__(self, POPULATION_SIZE, CHROMOSOME_LENGTH, param_ranges, MUTATION_RATE, NUM_GENERATIONS, game, neural_network_architecture):
+    def __init__(self, POPULATION_SIZE, param_ranges, MUTATION_RATE, NUM_GENERATIONS): #game, neural_network_architecture
         self.population_size = POPULATION_SIZE 
         self.num_generations = NUM_GENERATIONS
         self.param_ranges = param_ranges #dictionary upstairs
-        self.chromosome_length = CHROMOSOME_LENGTH # c_length empri
-        self.population = self.generate_population(self.population_size, self.param_ranges, self.chromosome_length)
+        self.population = self.generate_population(self.population_size, self.param_ranges)
         self.mutation_rate = MUTATION_RATE
         self.crossover_rate = CROSSOVER_RATE
-        self.game = game
-        self.neural_network_architecture = neural_network_architecture
 
-    def get_chromosome(self):
-        return {
-            'score': self.score,
-            'record': self.record,
-            'steps': self.steps,
-            'collisions': self.collisions,
-            'same_positions': self.same_positions
-        }
+    # def get_chromosome(self):
+    #     return {
+    #         'score': self.score,
+    #         'record': self.record,
+    #         'steps': self.steps,
+    #         'collisions': self.collisions,
+    #         'same_positions': self.same_positions
+    #     }
     
 
-    def generate_population(self, population_size, param_ranges, chromosome_length): #Random init or heuristic init (using prior info)
+    def generate_population(self, population_size, param_ranges): #Random init or heuristic init (using prior info)
         population = []
         for _ in range(population_size):
             params = {}
@@ -83,7 +80,7 @@ class GeneticAlgorithm:
         return population
     
     
-    def fitness_function(self, score, record, steps, collisions, same_positions_counter):
+    def fitness_function(self, score, record):
         # Initialize fitness to 0
         fitness = 0
 
@@ -97,7 +94,7 @@ class GeneticAlgorithm:
 
         return max(0, fitness)  # Ensure non-negative fitness
     
-    def calculate_population_fitness(self, population, game_metrics_list):
+    def calculate_population_fitness(self, game_metrics_list):
 
         """We should add fitness scores for all the population...."""
 
@@ -117,14 +114,14 @@ class GeneticAlgorithm:
             same_positions_counter = individual_metrics['same_positions']
 
             # Calculate fitness based on game performance
-            fitness = self.fitness_function(score, record, steps, collisions, same_positions_counter)
+            fitness = self.fitness_function(score, record)
             fitness_scores.append(fitness)
 
         return fitness_scores
     
     ##############################################################################################################################
-    
-    #fitness_scores = calculate_population_fitness(population)
+    """you can use this to test intermediate, if needed"""
+    #fitness_scores = calculate_population_fitness(population) 
     
     ##############################################################################################################################
     
@@ -170,10 +167,11 @@ class GeneticAlgorithm:
         return new_population, elite_sorted_indices # Diff. size / length
     ##############################################################################################################################
 
-
     # selected_population = selection(population = population, fitness_scores = fitness_scores) # Put at the end of code after implementation
     # parent1, parent2 = random.sample(selected_population, 2) # Put at the end of code after implementation
     
+    #############################################################################################################################
+
     """Single-point crossover for two parent individuals. Can explore two-point crossover, uniform crossover, elitist crossover, etc."""
     def crossover(self, parent1, parent2, crossover_rate):
 
@@ -203,6 +201,7 @@ class GeneticAlgorithm:
     """According to Genetic Algorithm, after crossover (breeding), we apply mutation to the resulting offspring to introduce
     small changes to their genetic material depending on the mutation rate, this helps explores new areas of solution space"""
     def mutation(self, individual, mutation_rate):
+
         mutated_individual = individual.copy()
 
         if isinstance(individual, list):
@@ -213,6 +212,7 @@ class GeneticAlgorithm:
                         mutated_individual[i] = max(min(individual[i] + random.uniform(-0.1, 0.1), 1.0), 0.0)
                     except ValueError:
                         print("Conversion to float failed. 'gene' might not be a numeric value.")
+
         elif isinstance(individual, dict):
             # Handle dictionary mutation
             for param, gene in individual.items():
@@ -230,7 +230,7 @@ class GeneticAlgorithm:
 
 
     ##############################################################################################################################
-    """My notes
+    """My notes to test
 
     population = generate_population(population_size = POPULATION_SIZE, param_ranges = param_ranges, chromosome_length = CHROMOSOME_LENGTH)
     fitness_scores = calculate_population_fitness(population = population)
@@ -318,3 +318,11 @@ class GeneticAlgorithm:
 
 
 #######################################################################################################################################
+
+print(GeneticAlgorithm(
+                            POPULATION_SIZE = POPULATION_SIZE,
+                            param_ranges = param_ranges, 
+                            MUTATION_RATE = MUTATION_RATE,
+                            NUM_GENERATIONS = NUM_GENERATIONS,
+                            ).genetic(num_generations = 10, score = 10, record = 5, steps = 1, collisions = 20, same_positions_counter = 4, game_metrics_list = 2))
+

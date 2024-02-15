@@ -169,7 +169,7 @@ class QLearningAgent:
     - 1. Epsilon Decay; 2. Action Selection; 3. Outcome"""
     def get_action(self, state):
         # Select actions based on an epsilon-greedy strategy
-        self.epsilon = 80 - self.n_games
+        self.epsilon = 60 - self.n_games
         final_move = [0,0,0]
         if random.randint(0, 200) < self.epsilon:
             move = random.randint(0, 2)
