@@ -319,10 +319,10 @@ class GeneticAlgorithm:
 
 #######################################################################################################################################
 
-print(GeneticAlgorithm(
-                            POPULATION_SIZE = POPULATION_SIZE,
-                            param_ranges = param_ranges, 
-                            MUTATION_RATE = MUTATION_RATE,
-                            NUM_GENERATIONS = NUM_GENERATIONS,
-                            ).genetic(num_generations = 10, score = 10, record = 5, steps = 1, collisions = 20, same_positions_counter = 4, game_metrics_list = 2))
+# print(GeneticAlgorithm(
+#                             POPULATION_SIZE = POPULATION_SIZE,
+#                             param_ranges = param_ranges, 
+#                             MUTATION_RATE = MUTATION_RATE,
+#                             NUM_GENERATIONS = NUM_GENERATIONS,
+#                             ).genetic(num_generations = 10, score = 10, record = 5, steps = 1, collisions = 20, same_positions_counter = 4, game_metrics_list = 2))
 
