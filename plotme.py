@@ -3,6 +3,7 @@ from IPython import display
 import numpy as np
 import imageio
 
+
 class TrainingPlot:
     def __init__(self):
         plt.ion()  # Turn on interactive mode
