@@ -3,6 +3,7 @@ from enum import Enum
 from collections import namedtuple
 import numpy as np
 
+
 check_errors = pygame.init() 
 if check_errors[1] > 0:
     print(f'[!] Had {check_errors[1]} errors when initialising game, exiting...')
