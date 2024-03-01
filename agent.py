@@ -8,6 +8,7 @@ from model import LinearQNet, QTrainer, ReplayBuffer, MultiLinearQNet
 from plotme import TrainingPlot
 from genetic import GeneticAlgorithm
 
+
 """
 Deep Q-Learning 
 Q new value = Q current   + Learn Rate * [ Reward + Discount Rate * Max Future Expected Reward - Q_current ]
